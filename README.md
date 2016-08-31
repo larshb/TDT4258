@@ -1,3 +1,4 @@
 # TDT4258
 Low-Level Programming
-Kjekt å ha
+
+  sudo shutdown -s 0
