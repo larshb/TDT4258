@@ -71,6 +71,9 @@
 
 .section .text
 
+iser0_addr:
+	.long ISER0
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Reset handler
@@ -86,6 +89,7 @@ _reset:
 	// Initialize I/O registers
 	ldr r6, =GPIO_PA_BASE
 	ldr r7, =GPIO_PC_BASE
+	ldr r8, =GPIO_BASE
 
 	// Enabling GPIO-clock
 	ldr r1, =CMU_BASE
@@ -115,11 +119,18 @@ _reset:
 	mov r2, #0xff
 	str r2, [r7, #GPIO_DOUT]
 
-mainloop:
-	ldr r2, [r7, #GPIO_DIN]
-	lsl r2, r2, #8
-	str r2, [r6, #GPIO_DOUT]
-	b mainloop
+	// Enable interrupt
+	mov r2, #0x22222222
+	str r2, [r8, #GPIO_EXTIPSELL]
+	mov r2, #0xff
+	str r2, [r8, #GPIO_EXTIFALL]
+	str r2, [r8, #GPIO_EXTIRISE]
+	str r2, [r8, #GPIO_IEN]
+	ldr r2, =#0x802
+	ldr r3, iser0_addr
+	str r2, [r3]
+
+	b .
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -130,7 +141,13 @@ mainloop:
 
     .thumb_func
 gpio_handler:
-	b .  // do nothing
+	ldr r2, [r8, #GPIO_IF]
+	str r2, [r8, #GPIO_IFC]
+
+	ldr r2, [r7, #GPIO_DIN]
+	lsl r2, r2, #8
+	str r2, [r6, #GPIO_DOUT]
+	bx lr
 
 /////////////////////////////////////////////////////////////////////////////
 
