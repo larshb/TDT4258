@@ -130,6 +130,17 @@ _reset:
 	ldr r3, iser0_addr
 	str r2, [r3]
 
+	///////////////////
+	// Energy saving //
+	///////////////////
+
+	// Change energy mode to energy mode 2
+	mov r2, 6
+	ldr r3, =SCR
+	str r2, [r3]
+
+	wfi //wait for interrupt
+
 	b .
 
 /////////////////////////////////////////////////////////////////////////////
@@ -147,6 +158,7 @@ gpio_handler:
 	ldr r2, [r7, #GPIO_DIN]
 	lsl r2, r2, #8
 	str r2, [r6, #GPIO_DOUT]
+
 	bx lr
 
 /////////////////////////////////////////////////////////////////////////////
