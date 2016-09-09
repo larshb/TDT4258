@@ -108,7 +108,9 @@ _reset:
 	str r2, [r6, #GPIO_MODEH]
 
 	// Initialize LEDs
-	// TODO
+	mov r9, 0b0001000000000000
+	eor r10, r9, 0xff00
+	str r10, [r6, #GPIO_DOUT]
 
 	// Setting buttons to input (pin 0-7)
 	mov r2, #0x33333333
@@ -138,9 +140,9 @@ _reset:
 	ldr r3, =SCR
 	str r2, [r3]
 
-	wfi //wait for interrupt
+	wfi	// wait for interrupt
 
-	b .
+	//b .
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -154,10 +156,34 @@ gpio_handler:
 	ldr r2, [r8, #GPIO_IF]
 	str r2, [r8, #GPIO_IFC]
 
-	ldr r2, [r7, #GPIO_DIN]
-	lsl r2, r2, 8
-	str r2, [r6, #GPIO_DOUT]
+	ldr r5, =GPIO_PA_BASE
+	add r5, #GPIO_DOUT
 
+	ldr r2, [r7, #GPIO_DIN]
+	cmp r2, 0xff
+	beq done
+	cmp r2, 0xfe
+	beq go_left
+	cmp r2, 0xfb
+	beq go_right
+
+done:
+	bx lr
+
+go_left:
+	cmp r9, 0x0100
+	beq done
+	lsr r9, r9, 1
+	eor r10, r9, 0xff00
+	str r10, [r6, #GPIO_DOUT]
+	bx lr
+
+go_right:
+	cmp r9, 0x8000
+	beq done
+	lsl r9, r9, 1
+	eor r10, r9, 0xff00
+	str r10, [r6, #GPIO_DOUT]
 	bx lr
 
 /////////////////////////////////////////////////////////////////////////////
