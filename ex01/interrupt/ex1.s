@@ -107,9 +107,8 @@ _reset:
 	mov r2, #0x55555555
 	str r2, [r6, #GPIO_MODEH]
 
-	// Initialize LEDs off
-	mov r2, #0xff00
-	str r2, [r6, #GPIO_DOUT]
+	// Initialize LEDs
+	// TODO
 
 	// Setting buttons to input (pin 0-7)
 	mov r2, #0x33333333
@@ -156,7 +155,7 @@ gpio_handler:
 	str r2, [r8, #GPIO_IFC]
 
 	ldr r2, [r7, #GPIO_DIN]
-	lsl r2, r2, #8
+	lsl r2, r2, 8
 	str r2, [r6, #GPIO_DOUT]
 
 	bx lr
