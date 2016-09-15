@@ -75,8 +75,9 @@ EMU_BASE = 0x400c6000
 
 EMU_CTRL = 0x000
 
+EMU_MEMCTRL = 0x004
+
 //////////////////////////////////////////////////////////////////////
 // System Control Block
 
 SCR = 0xe000ed10
-

@@ -135,14 +135,17 @@ _reset:
 	// Energy saving //
 	///////////////////
 
+	// Turn of RAM
+	mov r2, 7
+	ldr r3, =EMU_BASE
+	str r2, [r3, #EMU_MEMCTRL]
+
 	// Change energy mode to energy mode 2
 	mov r2, 6
 	ldr r3, =SCR
 	str r2, [r3]
 
 	wfi	// wait for interrupt
-
-	//b .
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -156,9 +159,7 @@ gpio_handler:
 	ldr r2, [r8, #GPIO_IF]
 	str r2, [r8, #GPIO_IFC]
 
-	ldr r5, =GPIO_PA_BASE
-	add r5, #GPIO_DOUT
-
+	// Read button status and choose action
 	ldr r2, [r7, #GPIO_DIN]
 	cmp r2, 0xff
 	beq done
@@ -166,25 +167,79 @@ gpio_handler:
 	beq go_left
 	cmp r2, 0xfb
 	beq go_right
+	cmp r2, 0xef
+	beq add_left
+	cmp r2, 0xbf
+	beq add_right
+	cmp r2, 0x7f
+	beq shrink
+	cmp r2, 0xdf
+	beq grow
+	cmp r2, 0xfd
+	beq new_left
+	cmp r2, 0xf7
+	beq new_right
 
 done:
 	bx lr
 
-go_left:
-	cmp r9, 0x0100
-	beq done
-	lsr r9, r9, 1
+set_leds:
+	and r9, r9, 0xff00
 	eor r10, r9, 0xff00
 	str r10, [r6, #GPIO_DOUT]
 	bx lr
 
+go_left:
+	and r2, r9, 0x0100
+	cmp r2, 0x0100
+	beq done
+	lsr r9, r9, 1
+	b set_leds
+
 go_right:
-	cmp r9, 0x8000
+	and r2, r9, 0x8000
+	cmp r2, 0x8000
 	beq done
 	lsl r9, r9, 1
-	eor r10, r9, 0xff00
-	str r10, [r6, #GPIO_DOUT]
-	bx lr
+	b set_leds
+
+add_left:
+	and r2, r9, 0x0100
+	cmp r2, 0x0100
+	bge done
+	lsr r10, r9, 1
+	orr r9, r9, r10
+	b set_leds
+
+add_right:
+	and r2, r9, 0x8000
+	cmp r2, 0x8000
+	bge done
+	lsl r10, r9, 1
+	orr r9, r9, r10
+	b set_leds
+
+shrink:
+	lsl r2, r9, 1
+	and r9, r2, r9
+	lsr r2, r9, 1
+	and r9, r2, r9
+	b set_leds
+
+grow:
+	lsl r2, r9, 1
+	orr r9, r2, r9
+	lsr r2, r9, 1
+	orr r9, r2, r9
+	b set_leds
+
+new_left:
+	orr r9, r9, 0x0100
+	b set_leds
+
+new_right:
+	orr r9, r9, 0x8000
+	b set_leds
 
 /////////////////////////////////////////////////////////////////////////////
 
