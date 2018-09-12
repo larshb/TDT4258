@@ -110,6 +110,10 @@ _reset:
 				mov r3, #0xff
 				str r3, [r2, #GPIO_DOUT]
 
+interrupt:
+				// INTERRUPTS BASED SOLUTION GOES HERE
+				b interrupt
+
 polling:
 				// Read buttons and output on LEDs
 				ldr r3, [r2, #GPIO_DIN]
