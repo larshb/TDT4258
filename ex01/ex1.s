@@ -82,6 +82,26 @@
 	      .type   _reset, %function
         .thumb_func
 _reset: 
+				// Enable GPIO clock
+				ldr r1, cmu_base_addr
+				ldr r2, [r1, #CMU_HFPERCLKEN0]
+				mov r3, #1
+				lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
+				orr r2, r2, r3
+				str r2, [r1, #CMU_HFPERCLKEN0]
+
+				// Set up LEDs
+				// Set drive strength high
+				ldr r1, gpio_pa_base_addr
+				mov r2, #2
+				str r2, [r1, #GPIO_CTRL]
+				// Set pins 8-15 to output
+				mov r2, #0x55555555
+				str r2, [r1, #GPIO_MODEH]
+				// Turn off some LED
+				mov r2, #0xaaaaaaaa
+				str r2, [r1, #GPIO_DOUT]
+
 	      b .  // do nothing
 	
 	/////////////////////////////////////////////////////////////////////////////
@@ -102,3 +122,7 @@ gpio_handler:
 dummy_handler:  
         b .  // do nothing
 
+cmu_base_addr:
+				.long CMU_BASE
+gpio_pa_base_addr:
+				.long GPIO_PA_BASE
