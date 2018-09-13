@@ -1,7 +1,3 @@
-# Example Makefile
-#
-# Exercise 1, TDT4258
-
 LD=arm-none-eabi-gcc
 AS=arm-none-eabi-as
 OBJCOPY=arm-none-eabi-objcopy
