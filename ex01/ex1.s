@@ -82,46 +82,52 @@
 	      .type   _reset, %function
         .thumb_func
 _reset: 
-				// Enable GPIO clock
-				ldr r1, =CMU_BASE
-				ldr r2, [r1, #CMU_HFPERCLKEN0]
-				mov r3, #1
-				lsl r3, r3, #CMU_HFPERCLKEN0_GPIO
-				orr r2, r2, r3
-				str r2, [r1, #CMU_HFPERCLKEN0]
+				ldr r1, =CMU_BASE									// + CMU configuration
+				ldr r2, [r1, #CMU_HFPERCLKEN0]			// Read current configuration
+				mov r3, 1
+				lsl r3, r3, #CMU_HFPERCLKEN0_GPIO		// Enable GPIO clock
+				orr r2, r2, r3											// Append
+				str r2, [r1, #CMU_HFPERCLKEN0]			// Store back
 
-				// Store GPIO base addresses
-				ldr r1, =GPIO_PA_BASE // (LEDs)
-				ldr r2, =GPIO_PC_BASE // (buttons)
+				ldr r1, =GPIO_PA_BASE 							// (LEDs,    H)
+				ldr r2, =GPIO_PC_BASE 							// (buttons, L)
+				ldr r3, =GPIO_BASE
 
-				// LEDs
-				// Set drive strength high
-				mov r3, #2
-				str r3, [r1, #GPIO_CTRL]
-				// Set pins (8-15) to output
-				mov r3, #0x55555555
-				str r3, [r1, #GPIO_MODEH]
+				mov r4, #2												// + LEDs
+				str r4, [r1, #GPIO_CTRL]						// Set drive strength high
+				mov r4, #0x55555555
+				str r4, [r1, #GPIO_MODEH]						// Set pins (8-15) to output
 
-				// Buttons
-				// Set pins (0-7) to input
-				mov r3, #0x33333333
-				str r3, [r2, #GPIO_MODEL]
-				// Enable pull-up
-				mov r3, #0xff
-				str r3, [r2, #GPIO_DOUT]
+				mov r4, #0x33333333									// Buttons
+				str r4, [r2, #GPIO_MODEL]						// Set pins (0-7) to input
+				mov r4, #0xff
+				str r4, [r2, #GPIO_DOUT]						// Enable pull-up
 
-interrupt:
-				// INTERRUPTS BASED SOLUTION GOES HERE
-				b interrupt
+				//b polling													// + Run polling solution
+
+				mov r4, #0x22222222								// + Interrupt setup
+				str r4, [r3, #GPIO_EXTIPSELL]				// Set GPIO Interrupt pins
+				mov r4, #0xff
+				str r4, [r3, #GPIO_EXTIFALL]				// Trigger on falling edge (button press)
+				str r4, [r3, #GPIO_EXTIRISE]				// Trigger on rising edge (button release)
+				str r4, [r3, #GPIO_IEN]							// Enable interrupt generation
+				ldr r4, =#0x802
+				ldr r5, =ISER0
+				str r4, [r5]												// Enable interrupt handling
+
+				mov r4, 7													// + Low-power enhancements
+				ldr r5, =EMU_BASE
+				str r4, [r5, #EMU_MEMCTRL]					// Disable RAM
+				mov r4, 6
+				ldr r5, =SCR
+				str r4, [r5]												// Set energy mode 2
+				wfi																	// Wait for interrupts (sleep)
 
 polling:
-				// Read buttons and output on LEDs
-				ldr r3, [r2, #GPIO_DIN]
-				lsl r3, r3, #8
-				str r3, [r1, #GPIO_DOUT]
+				ldr r4, [r2, #GPIO_DIN]							// Read buttons
+				lsl r4, r4, #8											// Shift into corresponding LED position
+				str r4, [r1, #GPIO_DOUT]						// Output on LEDs
 				b polling
-
-	      b .  // do nothing
 	
 	/////////////////////////////////////////////////////////////////////////////
 	//
@@ -132,8 +138,15 @@ polling:
 	
         .thumb_func
 gpio_handler:  
+				ldr r4, [r3, #GPIO_IF]							// Read source
+				str r4, [r3, #GPIO_IFC]							// Clear interrupt
 
-	      b .  // do nothing
+				// TODO: Move this duplicate code into subroutine
+				ldr r4, [r2, #GPIO_DIN]							// Read buttons
+				lsl r4, r4, #8											// Shift into corresponding LED position
+				str r4, [r1, #GPIO_DOUT]						// Output on LEDs
+
+				bx lr
 	
 	/////////////////////////////////////////////////////////////////////////////
 	
