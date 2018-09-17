@@ -1,11 +1,19 @@
 #!/bin/bash
 
-make #2> /dev/null
-
+make > make.log #2> /dev/null
+#make
 if [ $? -eq 0 ]
 then
-  echo "Successfully compiled, flashing binary..."
-  make upload #eACommander.sh -r --address 0x00000000 -f "ex1.bin" -r
+	printf "\e[92mSuccessfully compiled! \e[95mUploading... "
+	make upload > upload.log
+	if [ $? -eq 0 ]
+	then
+		printf "\e[92mUpload successfull!\n\e[39m"
+	else
+		cat upload.log
+	fi
+	rm upload.log
 else
-  echo "Compile error!" >&2
+	cat make.log
 fi
+rm make.log
