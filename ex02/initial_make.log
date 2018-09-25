@@ -1,0 +1,11 @@
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -g -std=c99 -Wall -c ex2.c -o ex2.o
+ex2.c: In function 'main':
+ex2.c:32:2: warning: implicit declaration of function 'setupGPIO' [-Wimplicit-function-declaration]
+  setupGPIO();
+  ^
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -g -std=c99 -Wall -c timer.c -o timer.o
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -g -std=c99 -Wall -c dac.c -o dac.o
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -g -std=c99 -Wall -c gpio.c -o gpio.o
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -g -std=c99 -Wall -c interrupt_handlers.c -o interrupt_handlers.o
+arm-none-eabi-gcc -T lib/efm32gg.ld ex2.o timer.o dac.o gpio.o interrupt_handlers.o -o ex2.elf -mcpu=cortex-m3 -mthumb -g -lgcc -lc -lcs3 -lcs3unhosted -lefm32gg -Llib 
+arm-none-eabi-objcopy -O binary ex2.elf ex2.bin
