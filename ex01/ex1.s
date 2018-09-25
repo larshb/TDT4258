@@ -84,7 +84,7 @@
 _reset: 
 				ldr r1, =CMU_BASE										/* CMU configuration */
 				ldr r2, [r1, #CMU_HFPERCLKEN0]			// Read current configuration
-				mov r3, 1
+				mov r3, #1
 				lsl r3, r3, #CMU_HFPERCLKEN0_GPIO		// Enable GPIO clock
 				orr r2, r2, r3											// Append
 				str r2, [r1, #CMU_HFPERCLKEN0]			// Store back
@@ -116,12 +116,21 @@ _reset:
 				ldr r5, =ISER0
 				str r4, [r5]												// Enable interrupt handling
 
+				ldr r4, =CMU_BASE
+				mov r5, 0x108 											
+				str r5, [r4, #CMU_OSCENCMD]					
+				ldr r5, [r4, #CMU_CMD]							// Enable LF crystal oscillator (LFXO), and disable HF
+				orr r5, r5, 0x4 										// Select LFXO as HFCLK
+				str r5, [r4, #CMU_CMD]
+
 				mov r4, 7														/* Low-power enhancements */
 				ldr r5, =EMU_BASE
 				str r4, [r5, #EMU_MEMCTRL]					// Disable RAM
 				mov r4, 6
 				ldr r5, =SCR
-				str r4, [r5]												// Set energy mode 2
+				str r4, [r5]												// Set energy mode 2 (deep sleep)
+
+				b clk_debug
 
 				wfi																	// Wait for interrupts (sleep)
 
@@ -131,6 +140,12 @@ polling:
 				str r4, [r1, #GPIO_DOUT]						// Output on LEDs
 
 				b polling
+
+clk_debug:
+				ldr r4, =CMU_BASE
+				ldr r5, [r4, #0x02c] // CMU_STATUS
+				str r5, [r1, #GPIO_DOUT]
+				b clk_debug
 	
 	/////////////////////////////////////////////////////////////////////////////
 	//

@@ -28,7 +28,7 @@
         GPIO_DIN      = 0x1c
         GPIO_PINLOCKN = 0x20
 
-	      GPIO_BASE = 0x40006100
+	      GPIO_BASE = dx40006100
 
 	      // register offsets from base address
         GPIO_EXTIPSELL = 0x00
@@ -45,6 +45,8 @@
         CMU_BASE = 0x400c8000
 
         CMU_HFPERCLKDIV = 0x008
+        CMU_OSCENCMD    = 0x020
+        CMU_CMD         = 0x024
         CMU_HFPERCLKEN0 = 0x044
 
         CMU_HFPERCLKEN0_GPIO = 13
