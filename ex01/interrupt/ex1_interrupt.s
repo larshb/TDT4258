@@ -26,8 +26,6 @@
 				ldr r5, =SCR
 				str r4, [r5]												// Set energy mode 2 (deep sleep)
 
-				b clk_debug
-
 				wfi																	// Wait for interrupts (sleep)
 
 clk_debug:
