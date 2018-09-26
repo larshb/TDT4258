@@ -7,14 +7,16 @@ ASFLAGS=-mcpu=cortex-m3 -mthumb -g
 
 LINKERSCRIPT=../efm32gg.ld
 
-ex1.bin : ex1_polling.elf
-	${OBJCOPY} -j .text -O binary $< $@
+ex1_polling.o : ex1_polling.s
+	${AS} ${ASFLAGS} $< -o $@
 
-ex1.elf : ex1_polling.o
+ex1_polling.elf : ex1_polling.o
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS}
 
-ex1.o : ex1_polling.s
-	${AS} ${ASFLAGS} $< -o $@
+ex1_polling.bin : ex1_polling.elf
+	${OBJCOPY} -j .text -O binary $< $@
+
+
 
 .PHONY : upload
 upload :

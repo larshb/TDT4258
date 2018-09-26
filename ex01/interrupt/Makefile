@@ -7,14 +7,16 @@ ASFLAGS=-mcpu=cortex-m3 -mthumb -g
 
 LINKERSCRIPT=efm32gg.ld
 
-ex1.bin : ex1_interrupt.elf
-	${OBJCOPY} -j .text -O binary $< $@
+ex1_interrupt.o : ex1_interrupt.s
+	${AS} ${ASFLAGS} $< -o $@
 
-ex1.elf : ex1_interrupt.o
+ex1_interrupt.elf : ex1_interrupt.o
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS}
 
-ex1.o : ex1_interrupt.s
-	${AS} ${ASFLAGS} $< -o $@
+ex1_interrupt.bin : ex1_interrupt.elf
+	${OBJCOPY} -j .text -O binary $< $@
+
+
 
 .PHONY : upload
 upload :
