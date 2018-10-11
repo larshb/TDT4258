@@ -29,7 +29,7 @@ int main(void)
 	setupTimer(SAMPLE_PERIOD);
 
 	snd_init();
-	polling();
+	//polling();
 
 	/*
 	 * Enable interrupt handling 
@@ -55,6 +55,7 @@ void setupNVIC()
 	 * need TIMER1, GPIO odd and GPIO even interrupt handling for this
 	 * assignment. 
 	 */
+	*ISER0 |= 1U << 12; /* Enable timer interrupts */
 }
 
 /*
