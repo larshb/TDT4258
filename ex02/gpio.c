@@ -1,7 +1,8 @@
-#include <stdint.h>
 #include <stdbool.h>
 
 #include "efm32gg.h"
+
+#include "gpio.h"
 
 /*
  * function to set up GPIO mode and interrupts
@@ -34,9 +35,6 @@ uint8_t reverseBits(uint8_t bits) {
 #define LEDS_BASE GPIO_PA_DOUT
 #define LEDS_OFFSET 8U
 
-typedef enum { ON=0, OFF=1 } led_state_t; /* (active low) */
-typedef enum { D1=0, D2, D3, D4, D5, D6, D7, D8 } led_t;
-
 void gpio_leds_set(led_t d, led_state_t state) {
 	if (state == ON) { /* Active low */
 		*LEDS_BASE &= ~(1UL << (d+LEDS_OFFSET));
@@ -62,8 +60,6 @@ void gpio_leds_write(uint8_t out) {
 #define BTN_SW7_MASK 0xBF // Right, right
 #define BTN_SW8_MASK 0x7F // Right, down
 /* may not be needed */
-
-typedef enum { SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8 } button_t;
 
 uint8_t gpio_btn_pressed(button_t btn) {
 	return ~(*GPIO_PC_DIN >> (uint8_t)(btn)) & 1U;
