@@ -28,7 +28,7 @@
         GPIO_DIN      = 0x1c
         GPIO_PINLOCKN = 0x20
 
-	      GPIO_BASE = dx40006100
+	      GPIO_BASE = 0x40006100
 
 	      // register offsets from base address
         GPIO_EXTIPSELL = 0x00

@@ -5,20 +5,22 @@ OBJCOPY=arm-none-eabi-objcopy
 LDFLAGS=-nostdlib
 ASFLAGS=-mcpu=cortex-m3 -mthumb -g
 
-LINKERSCRIPT=efm32gg.ld
+LINKERSCRIPT=../efm32gg.ld
 
-ex1.bin : ex1.elf
+SOLUTION?=improved
+
+ex1_${SOLUTION}.bin : ex1_${SOLUTION}.elf
 	${OBJCOPY} -j .text -O binary $< $@
 
-ex1.elf : ex1.o 
+ex1_${SOLUTION}.elf : ex1_${SOLUTION}.o 
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS} 
 
-ex1.o : ex1.s
+ex1_${SOLUTION}.o : ex1_${SOLUTION}.s
 	${AS} ${ASFLAGS} $< -o $@
 
 .PHONY : upload
 upload :
-	-eACommander.sh -r --address 0x00000000 -f "ex1.bin" -r
+	-eACommander.sh -r --address 0x00000000 -f "ex1_${SOLUTION}.bin" -r
 
 .PHONY : clean
 clean :
