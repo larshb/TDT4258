@@ -1,6 +1,8 @@
 #ifndef SOUND_H__
 #define SOUND_H__
 
+#include "melodies.h"
+
 #include <stdint.h>
 
 /*
@@ -23,5 +25,7 @@ void snd_init();
 void snd_volAdjust(snd_vol_adj_t adj);
 
 void audioOut();
+
+uint8_t snd_PlayMelody(melody_t* melody);
 
 #endif /* end of include guard: SOUND_H__ */

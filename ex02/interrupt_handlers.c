@@ -4,19 +4,21 @@
 #include "efm32gg.h"
 #include "sound.h"
 
+#include "melodies.h"
+
 /*
  * TIMER1 interrupt handler 
  */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 {
-	*TIMER1_IFC = 1U;
+	*TIMER1_IFC = 1U; /* Clear interrupt */
+
+	/* Play startup sound */
 	audioOut();
-	unsigned int factor = 50;
-	snd_out=(snd_out+factor)%SND_OUT_MAX;
-	/*
-	 * TODO feed new samples to the DAC remember to clear the pending
-	 * interrupt by writing 1 to TIMER1_IFC 
-	 */
+	static int done = 0;
+	if (!done) {
+		done = snd_PlayMelody(&mel_1up);
+	}
 }
 
 /*

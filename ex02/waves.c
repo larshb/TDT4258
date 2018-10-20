@@ -27,8 +27,7 @@ void triangle(uint16_t frequency) {
 
 void square(uint16_t frequency){
 	static uint16_t t = 0;
-	//-----------------------------------------------v dirty fix
-	uint16_t ticks_per_wave = SAMPLE_RATE/(frequency*2);
+	uint16_t ticks_per_wave = SAMPLE_RATE/(frequency);
 	t=(t+1)%ticks_per_wave;
 	snd_out = t<ticks_per_wave/2?SND_OUT_MAX:0;
 }
