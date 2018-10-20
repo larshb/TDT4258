@@ -16,6 +16,8 @@ void setupDAC();
 void setupNVIC();
 void polling();
 
+//#include "notes.h" //<-remove
+
 /*
  * Your code will start executing here 
  */

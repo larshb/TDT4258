@@ -3,7 +3,7 @@
 
 void sawtooth(uint16_t frequency) {
 	//-----------------------------------------------v dirty fix
-	uint32_t ticks_per_wave = SAMPLE_RATE/(frequency*2);
+	uint32_t ticks_per_wave = SAMPLE_RATE/(frequency);//*2);
 	snd_out=(snd_out+SND_OUT_MAX/ticks_per_wave);
 	if (snd_out > SND_OUT_MAX)
 		snd_out = 0;

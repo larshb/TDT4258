@@ -27,7 +27,7 @@ uint8_t snd_PlayMelody(melody_t* melody) {
 	uint8_t last = 0;
 	static uint32_t time_iterator = 0;
 
-	if (time_iterator == SAMPLE_RATE/1000*melody->notes[melody->x].duration) {
+	if (time_iterator == SAMPLE_RATE/1000*melody->tones[melody->x].duration) {
 		time_iterator = 0;
 		if (melody->x < melody->n - 1) {
 			melody->x++;
@@ -39,7 +39,28 @@ uint8_t snd_PlayMelody(melody_t* melody) {
 	}
 
 	time_iterator++;
-	square(melody->notes[melody->x].frequency);
+	square(melody->tones[melody->x].frequency);
+
+	return last;
+}
+
+uint8_t snd_PlayMelody2(melody_t2* melody) {
+	uint8_t last = 0;
+	static uint32_t time_iterator = 0;
+
+	if (time_iterator == SAMPLE_RATE/1000*melody->tones[melody->x].duration) {
+		time_iterator = 0;
+		if (melody->x < melody->n - 1) {
+			melody->x++;
+		}
+		else {
+			melody->x = 0;
+			last = 1;
+		}
+	}
+
+	time_iterator++;
+	sawtooth(note2freq(melody->tones[melody->x].note));
 
 	return last;
 }

@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 typedef enum { ON=0, OFF=1 } led_state_t; /* (active low) */
-typedef enum { D1=0, D2, D3, D4, D5, D6, D7, D8 } led_t;
+typedef enum { LED1=0, LED2, LED3, LED4, LED5, LED6, LED7, LED8 } led_t;
 
 void gpio_leds_set(led_t d, led_state_t state);
 

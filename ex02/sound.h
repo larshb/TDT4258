@@ -27,5 +27,6 @@ void snd_volAdjust(snd_vol_adj_t adj);
 void audioOut();
 
 uint8_t snd_PlayMelody(melody_t* melody);
+uint8_t snd_PlayMelody2(melody_t2* melody);
 
 #endif /* end of include guard: SOUND_H__ */

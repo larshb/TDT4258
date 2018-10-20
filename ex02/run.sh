@@ -1,5 +1,6 @@
 #!/bin/bash
 
+make clean >/dev/null
 make > make.log #2> /dev/null
 #make
 if [ $? -eq 0 ]
