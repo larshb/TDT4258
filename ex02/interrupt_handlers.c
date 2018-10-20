@@ -17,7 +17,7 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 	audioOut();
 	static int done = 0;
 	if (!done) {
-		done = snd_PlayMelody2(&mel_mushroom2);
+		done = snd_PlayMelody2(&mel_mushroom);
 	}
 }
 
