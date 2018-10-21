@@ -1,25 +1,16 @@
 #include "melodies.h"
 
 melody_t mel_startup = {
-	.tones = (tone_t[]){{200, 100}, {300, 100}, {400, 100}},
+	.tones = (tone_t[]){
+		{G3,100},
+		{G4,100},
+		{G5,100}},
 	.n = 3,
 	.x = 0
 };
 
 melody_t mel_1up = {
-	.tones = (tone_t[]){{659,150}, {784,150}, {1319,150}, {1047, 150}, {1175,150}, {1568,200}},
-	.n = 6,
-	.x = 0
-};
-
-melody_t2 mel_startup2 = {
-	.tones = (tone_t2[]){{G3,100},{G4,100},{G5,100}},
-	.n = 3,
-	.x = 0
-};
-
-melody_t2 mel_1up2 = {
-	.tones = (tone_t2[]){
+	.tones = (tone_t[]){
 		{E5,150},
 		{G5,150},
 		{E6,150},
@@ -31,8 +22,8 @@ melody_t2 mel_1up2 = {
 };
 
 #define dur 35
-melody_t2 mel_powerup = {
-	.tones = (tone_t2[]){
+melody_t mel_powerup = {
+	.tones = (tone_t[]){
 		{ C5,dur},
 		{ G4,dur},
 		{ C5,dur},
@@ -64,8 +55,8 @@ melody_t2 mel_powerup = {
 	.x = 0
 };
 
-melody_t2 mel_powerdown = {
-	.tones = (tone_t2[]){
+melody_t mel_powerdown = {
+	.tones = (tone_t[]){
 		{A4,30},
 		{G4,30},
 		{E4,30},

@@ -23,7 +23,7 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 	/* Play startup sound */
 	static uint8_t done = 0;
 	if (!done) {
-		done = snd_PlayMelody2(&mel_1up2);
+		done = snd_PlayMelody(&mel_1up);
 	}
 
 	/* Do as little as possible inside this ISR to make sure no

@@ -6,7 +6,7 @@
 #include <stdint.h>
 
 typedef struct {
-	uint16_t frequency;	/* Hz */
+	note_t note;	/* Hz */
 	uint16_t duration;	/* ms */
 } tone_t;
 
@@ -16,23 +16,9 @@ typedef struct {
 	uint16_t x; /* Current note */
 } melody_t;
 
-typedef struct {
-	note_t note;	/* Hz */
-	uint16_t duration;	/* ms */
-} tone_t2;
-
-typedef struct {
-	tone_t2* tones;
-	uint16_t n; /* Number of notes */
-	uint16_t x; /* Current note */
-} melody_t2;
-
 melody_t mel_startup;
 melody_t mel_1up;
-
-melody_t2 mel_startup2;
-melody_t2 mel_1up2;
-melody_t2 mel_powerup;
-melody_t2 mel_powerdown;
+melody_t mel_powerup;
+melody_t mel_powerdown;
 
 #endif /* end of include guard: MELODIES_H__ */
