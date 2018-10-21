@@ -1,6 +1,8 @@
 #include "waves.h"
 #include "sound.h"
 
+void (*waveFunctions[N_WAVES])(uint16_t) = {sawtooth, triangle, square};
+
 void sawtooth(uint16_t frequency) {
 	//-----------------------------------------------v dirty fix
 	uint32_t ticks_per_wave = SAMPLE_RATE/(frequency);//*2);

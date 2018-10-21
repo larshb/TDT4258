@@ -4,8 +4,31 @@
 
 #define MELODY_SPS 1000 /* Steps per second / tone length resolution */
 
+/* NOTE This seemed to slow performance slightly */
+void (*snd_waveFcn)(uint16_t) = sawtooth; /* Waveform generator function */
+
+/* FIXME Make flag and melody pointer atomic to avoid race conditions */
+uint8_t melody_done = 0;
+melody_t* melody_ptr = &mel_startup;
+
+void snd_playMelody();
+
+uint8_t  snd_vol = 5;	/* Current volume adjustment factor */
+
 void snd_init(){
-	snd_vol = 5;
+	/* Nothing here */
+}
+
+void snd_sampleTick() {
+	/* Output sample at start of interrupt to ensure smooth playback */
+	snd_audioOut();
+
+	/* Play startup sound */
+	snd_playMelody();
+
+	/* Do as little as possible inside this ISR to make sure no
+	 * samples are missed or corrupted.
+	 */
 }
 
 void snd_volAdjust(snd_vol_adj_t adj) {
@@ -26,9 +49,28 @@ void snd_audioOut() {
 	*DAC0_CH1DATA = amp;
 }
 
-uint8_t snd_PlayMelody(melody_t* melody) {
+void snd_waveSelect(snd_waveSelectDir_t dir) {
+	static int8_t wav_itr = 0;
+	switch(dir) {
+		case PREVIOUS:
+			wav_itr--;
+		case NEXT:
+			wav_itr++;
+	}
+	wav_itr%=N_WAVES;
+	snd_waveFcn = waveFunctions[wav_itr];
+}
+
+uint8_t snd_stepMelody(melody_t* melody) {
 	uint8_t last = 0;
 	static uint32_t time_iterator = 0;
+
+	/* Overlap insurance */
+	static melody_t* prev_mel = 0;
+	if (prev_mel != melody) {
+		prev_mel = melody;
+		time_iterator = 0;
+	}
 
 	if (time_iterator == SAMPLE_RATE/MELODY_SPS*melody->tones[melody->x].duration) {
 		time_iterator = 0;
@@ -42,7 +84,18 @@ uint8_t snd_PlayMelody(melody_t* melody) {
 	}
 
 	time_iterator++;
-	sawtooth(note2freq(melody->tones[melody->x].note));
+	snd_waveFcn(note2freq(melody->tones[melody->x].note));
 
 	return last;
+}
+
+void snd_playMelody() {
+	if (!melody_done) {
+		melody_done = snd_stepMelody(melody_ptr);
+	}
+}
+
+void snd_selectMelody(melody_t* mel) {
+	melody_done = 0;
+	melody_ptr = mel;
 }

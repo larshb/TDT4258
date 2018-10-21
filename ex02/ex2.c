@@ -43,13 +43,12 @@ int main(void)
 	 * TODO for higher energy efficiency, sleep while waiting for
 	 * interrupts instead of infinite loop for busy-waiting 
 	 */
+	while(1); /* Ignore below code */
 	uint16_t i;
 	uint8_t j;
 	while (1) {
-		i++;
-		if (i==0) {
+		if (++i==0)
 			gpio_leds_write(j++);
-		}
 	}
 
 	return 0;
@@ -66,6 +65,7 @@ void setupNVIC()
 	 * assignment. 
 	 */
 	*ISER0 |= 1U << 12; /* Enable timer interrupts */
+	*ISER0 |= 0x802;    /* Enable GPIO interrupts */
 }
 
 /*
@@ -113,15 +113,7 @@ void polling() {
 			snd_audioOut();
 		}
 
-		/* Volume control */
-		if (gpio_btn_pressed(SW2) && snd_vol<SND_VOL_MAX) {
-			snd_volAdjust(UP);
-			while(gpio_btn_pressed(SW2)); /* Debounce */
-		}
-		if (gpio_btn_pressed(SW4) && snd_vol>0){
-			snd_volAdjust(DOWN);
-			while(gpio_btn_pressed(SW4)); /* Debounce */
-		}
+		gpio_btn_handler();
 
 		busy_sample_tick();
 	}

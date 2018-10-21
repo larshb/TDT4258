@@ -1,41 +1,26 @@
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "efm32gg.h"
 #include "sound.h"
-
-#include "melodies.h"
-
-#include "gpio.h" //testing
-#include "waves.h"
+#include "gpio.h"
 
 /*
  * TIMER1 interrupt handler 
  */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 {
-	/* Output sample at start of interrupt to ensure smooth playback */
-	snd_audioOut();
-
 	/* Clear interrupt flag */
 	*TIMER1_IFC = 1U;
 
-	/* Play startup sound */
-	static uint8_t done = 0;
-	if (!done) {
-		done = snd_PlayMelody(&mel_1up);
-	}
-
-	/* Do as little as possible inside this ISR to make sure no
-	 * samples are missed or corrupted.
-	 */
+	snd_sampleTick();
 }
+
+void GPIO_IRQHandler(); /* Handle all buttons the same */
 
 /*
  * GPIO even pin interrupt handler 
  */
 void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
 {
+	GPIO_IRQHandler();
 	/*
 	 * TODO handle button pressed event, remember to clear pending
 	 * interrupt 
@@ -47,8 +32,15 @@ void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
  */
 void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
 {
+	GPIO_IRQHandler();
 	/*
 	 * TODO handle button pressed event, remember to clear pending
 	 * interrupt 
 	 */
+}
+
+void GPIO_IRQHandler() {
+	*GPIO_IFC = *GPIO_IF; /* Clear interrupt flag */
+	
+	gpio_btn_handler();
 }

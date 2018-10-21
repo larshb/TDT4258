@@ -9,6 +9,12 @@ melody_t mel_startup = {
 	.x = 0
 };
 
+melody_t mel_pitchfork = {
+	.tones = (tone_t[]){{A4,1000}},
+	.n = 1,
+	.x = 0
+};
+
 melody_t mel_1up = {
 	.tones = (tone_t[]){
 		{E5,150},
