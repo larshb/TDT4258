@@ -1,7 +1,7 @@
 #include "waves.h"
 #include "sound.h"
 
-void (*waveFunctions[N_WAVES])(uint16_t) = {sawtooth, triangle, square};
+void (*waveFunctions[N_WAVES])(uint16_t) = {sawtooth, square, triangle, podium};
 
 static inline uint16_t calc_ticks_per_wave(uint16_t frequency) {
 	return SAMPLE_RATE/(frequency)-1;
@@ -28,7 +28,6 @@ void sawtooth(uint16_t frequency) {
 /* Somewhat broken */
 void triangle(uint16_t frequency) {
 	GENERATOR_BASE(SND_OUT_MAX/ticks_per_wave*2)
-
 	static uint8_t t = 0;
 
 	if (t < ticks_per_wave/2+1)
@@ -41,10 +40,34 @@ void triangle(uint16_t frequency) {
 
 
 void square(uint16_t frequency){
-	GENERATOR_BASE(1)
-
+	GENERATOR_BASE(0)
+	(void)step;
 	static uint16_t t = 0;
 
+	snd_out = t<ticks_per_wave/2?SND_OUT_MAX:0;
+
 	t=(t+1)%ticks_per_wave;
-	snd_out = t<ticks_per_wave/2?step*SND_OUT_MAX:0;
+}
+
+void podium(uint16_t frequency) {
+	GENERATOR_BASE(0)
+	(void)step;
+	static uint16_t t = 0;
+
+	uint8_t quarter = t/(ticks_per_wave/4);
+	switch(quarter) {
+		case 0:
+		default:
+			snd_out = 0;
+			break;
+		case 1:
+		case 3:
+			snd_out = SND_OUT_MAX/2;
+			break;
+		case 2:
+			snd_out = SND_OUT_MAX;
+			break;
+	}
+
+	t=(t+1)%ticks_per_wave;
 }
