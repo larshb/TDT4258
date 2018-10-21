@@ -1,8 +1,6 @@
 #!/bin/bash
 
-make clean >/dev/null
-make > make.log #2> /dev/null
-#make
+make rebuild > make.log
 if [ $? -eq 0 ]
 then
 	printf "\e[92mSuccessfully compiled! \e[95mUploading... "

@@ -1,7 +1,6 @@
 #include "efm32gg.h"
 
 #include "gpio.h"
-#include "waves.h"
 #include "sound.h"
 
 /* Declaration of peripheral setup functions */
