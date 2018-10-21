@@ -6,19 +6,29 @@
 
 #include "melodies.h"
 
+#include "gpio.h" //testing
+#include "waves.h"
+
 /*
  * TIMER1 interrupt handler 
  */
 void __attribute__ ((interrupt)) TIMER1_IRQHandler()
 {
-	*TIMER1_IFC = 1U; /* Clear interrupt */
+	/* Output sample at start of interrupt to ensure smooth playback */
+	snd_audioOut();
+
+	/* Clear interrupt flag */
+	*TIMER1_IFC = 1U;
 
 	/* Play startup sound */
-	audioOut();
-	static int done = 0;
+	static uint8_t done = 0;
 	if (!done) {
-		done = snd_PlayMelody2(&mel_mushroom);
+		done = snd_PlayMelody2(&mel_1up2);
 	}
+
+	/* Do as little as possible inside this ISR to make sure no
+	 * samples are missed or corrupted.
+	 */
 }
 
 /*

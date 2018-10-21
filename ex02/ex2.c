@@ -37,12 +37,20 @@ int main(void)
 	 * Enable interrupt handling 
 	 */
 	setupNVIC();
+	//polling();
 
 	/*
 	 * TODO for higher energy efficiency, sleep while waiting for
 	 * interrupts instead of infinite loop for busy-waiting 
 	 */
-	while (1);
+	uint16_t i;
+	uint8_t j;
+	while (1) {
+		i++;
+		if (i==0) {
+			gpio_leds_write(j++);
+		}
+	}
 
 	return 0;
 }
@@ -93,26 +101,26 @@ void polling() {
 	while(1) {
 		/* Play tone */
 		if (gpio_btn_pressed(SW6)) {
-			triangle(480);
-			audioOut();
+			triangle(440);
+			snd_audioOut();
 		}
 		if (gpio_btn_pressed(SW7)) {
-			sawtooth(480);
-			audioOut();
+			sawtooth(440);
+			snd_audioOut();
 		}
 		if (gpio_btn_pressed(SW8)) {
-			square(480);
-			audioOut();
+			square(440);
+			snd_audioOut();
 		}
 
 		/* Volume control */
-		if (gpio_btn_pressed(SW2) && snd_vol<100) {
+		if (gpio_btn_pressed(SW2) && snd_vol<SND_VOL_MAX) {
 			snd_volAdjust(UP);
-			while(gpio_btn_pressed(SW2));
+			while(gpio_btn_pressed(SW2)); /* Debounce */
 		}
 		if (gpio_btn_pressed(SW4) && snd_vol>0){
 			snd_volAdjust(DOWN);
-			while(gpio_btn_pressed(SW4));
+			while(gpio_btn_pressed(SW4)); /* Debounce */
 		}
 
 		busy_sample_tick();

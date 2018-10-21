@@ -29,6 +29,10 @@ typedef struct {
 
 melody_t mel_startup;
 melody_t mel_1up;
-melody_t2 mel_mushroom;
+
+melody_t2 mel_startup2;
+melody_t2 mel_1up2;
+melody_t2 mel_powerup;
+melody_t2 mel_powerdown;
 
 #endif /* end of include guard: MELODIES_H__ */
