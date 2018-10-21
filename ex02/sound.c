@@ -2,6 +2,8 @@
 #include "efm32gg.h"
 #include "waves.h"
 
+uint8_t  snd_vol = 5;	/* Current volume adjustment factor */
+
 #define MELODY_SPS 1000 /* Steps per second / tone length resolution */
 
 /* NOTE This seemed to slow performance slightly */
@@ -12,8 +14,6 @@ uint8_t melody_done = 0;
 melody_t* melody_ptr = &mel_startup;
 
 void snd_playMelody();
-
-uint8_t  snd_vol = 5;	/* Current volume adjustment factor */
 
 void snd_init(){
 	/* Nothing here */

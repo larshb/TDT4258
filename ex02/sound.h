@@ -5,9 +5,9 @@
 
 #include <stdint.h>
 
-#define SAMPLE_RATE_REQ	   44100 /* Requested sample rate */
+#define SAMPLE_RATE_REQ	   40000 /* Requested sample rate */
 #define DAC_CLK			14000000 /* Default DAC clock frequency [Hz] */
-#define SAMPLE_PERIOD 	(DAC_CLK/SAMPLE_RATE_REQ) 	/* ~ 48 kHz (ticks / 14MHz [default]) */
+#define SAMPLE_PERIOD 	(DAC_CLK/SAMPLE_RATE_REQ) 	/* ~x kHz (ticks / 14MHz [default]) */
 #define SAMPLE_RATE 	(DAC_CLK/(uint16_t)SAMPLE_PERIOD) /* Actual sample rate (floored) */
 
 #define SND_OUT_MAX 0xFFF 	/* 12 bit channel registers */
