@@ -17,6 +17,39 @@
  * MSC_IRQHandler AES_IRQHandler EBI_IRQHandler EMU_IRQHandler 
  */
 
+button_t gpio_btn_lookup() {
+	for (button_t btn = SW1; btn <= SW8; btn++) { // Check all buttons
+		if (gpio_btn_pressed(btn))
+			return btn;
+	}
+	return -1; /* Error / no button pressed */
+}
+
+
+/* Buttons
+ * TODO: Substitute hex values with more descriptive inverted bitfields
+ */
+#define BTN_SW1_MASK 0xFE // Left,  left
+#define BTN_SW2_MASK 0xFD // Left,  up
+#define BTN_SW3_MASK 0xFB // Left,  right
+#define BTN_SW4_MASK 0xF7 // Left,  down
+#define BTN_SW5_MASK 0xEF // Right, left
+#define BTN_SW6_MASK 0xDF // Right, up
+#define BTN_SW7_MASK 0xBF // Right, right
+#define BTN_SW8_MASK 0x7F // Right, down
+/* may not be needed */
+
+uint8_t reverseBits(uint8_t bits) {
+	uint8_t rbits = 0U;
+	while(bits > 0) {
+		rbits <<= 1;
+		if (bits & 1U)
+			rbits ^= 1;
+		bits >>= 1;
+	}
+	return rbits;
+}
+
 void triangleForever(){
 	volatile uint16_t i;
 	uint16_t factor = 10;

@@ -12,7 +12,5 @@ void gpio_leds_write(uint8_t out);
 typedef enum { SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8 } button_t;
 
 uint8_t gpio_btn_pressed(button_t btn);
-button_t gpio_btn_lookup(); /* Returns first (lowest numbered) button pressed */
-void gpio_btn_handler();
 
 #endif /* end of include guard: GPIO_H__ */

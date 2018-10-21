@@ -16,11 +16,8 @@ melody_t* melody_ptr = &mel_startup;
 void snd_playMelody();
 
 void snd_sampleTick() {
-	/* Output sample at start of interrupt to ensure smooth playback */
-	snd_audioOut();
-
-	/* Play startup sound */
-	snd_playMelody();
+	snd_audioOut(); /* Output sample at start of interrupt to ensure smooth playback */
+	snd_playMelody(); /* Play startup sound */
 
 	/* Do as little as possible inside this ISR to make sure no
 	 * samples are missed or corrupted.
@@ -28,14 +25,13 @@ void snd_sampleTick() {
 }
 
 void snd_volAdjust(snd_vol_adj_t adj) {
-	if (adj == UP) {
+	if (adj == UP)
 		snd_vol = snd_vol<SND_VOL_MAX ? (snd_vol+1) : snd_vol;
-	}
 	else
 		snd_vol = snd_vol == 0 ? 0 : (snd_vol - 1);
 }
 
-void snd_audioOut() {
+void snd_audioOut() { /* Mono playback */
 	if (snd_out > SND_OUT_MAX)
 		snd_out = SND_OUT_MAX; /* Saturate output (12 bits) */
 	uint32_t amp = (uint32_t)(snd_out*snd_vol)/SND_VOL_MAX; /* Apply volume */
@@ -47,7 +43,7 @@ void snd_audioOut() {
 
 void snd_waveSelect(snd_waveSelectDir_t dir) {
 	static int8_t wav_itr = 0;
-	/* Wraps around (eg. 0->1->2->0->1->2->...) */
+	/* Wraps around (eg. 0->1->2->3->0->1->2->3->...) */
 	switch(dir) {
 		case PREVIOUS:
 			wav_itr = wav_itr == 0 ? N_WAVES-1 : wav_itr-1;
@@ -58,7 +54,6 @@ void snd_waveSelect(snd_waveSelectDir_t dir) {
 		default:
 			break;
 	}
-	//wav_itr%=N_WAVES;
 	snd_waveFcn = waveFunctions[wav_itr];
 }
 

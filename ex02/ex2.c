@@ -41,7 +41,6 @@ void busy_sample_tick() {
 
 void polling() {
 	while(1) {
-		gpio_btn_handler();
 		busy_sample_tick();
 	}
 }
