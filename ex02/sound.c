@@ -51,13 +51,18 @@ void snd_audioOut() {
 
 void snd_waveSelect(snd_waveSelectDir_t dir) {
 	static int8_t wav_itr = 0;
+	/* Wraps around (eg. 0->1->2->0->1->2->...) */
 	switch(dir) {
 		case PREVIOUS:
-			wav_itr--;
+			wav_itr = wav_itr == 0 ? N_WAVES-1 : wav_itr-1;
+			break;
 		case NEXT:
-			wav_itr++;
+			wav_itr = wav_itr == N_WAVES-1 ? 0 : wav_itr+1;
+			break;
+		default:
+			break;
 	}
-	wav_itr%=N_WAVES;
+	//wav_itr%=N_WAVES;
 	snd_waveFcn = waveFunctions[wav_itr];
 }
 
