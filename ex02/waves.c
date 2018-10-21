@@ -1,6 +1,8 @@
 #include "waves.h"
 #include "sound.h"
 
+/* TODO Use retvals instead of writing directly to snd_out? */
+
 void (*waveFunctions[N_WAVES])(uint16_t) = {sawtooth, square, triangle, podium};
 
 static inline uint16_t calc_ticks_per_wave(uint16_t frequency) {
