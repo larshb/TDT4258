@@ -21,8 +21,6 @@ extern melody_t* melody_ptr;
 
 typedef enum {UP, DOWN} snd_vol_adj_t;
 
-void snd_init();
-
 void snd_sampleTick();
 
 void snd_volAdjust(snd_vol_adj_t adj);

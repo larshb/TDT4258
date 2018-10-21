@@ -2,45 +2,28 @@
 #include "sound.h"
 #include "gpio.h"
 
-/*
- * TIMER1 interrupt handler 
- */
-void __attribute__ ((interrupt)) TIMER1_IRQHandler()
-{
-	/* Clear interrupt flag */
-	*TIMER1_IFC = 1U;
+void __attribute__ ((interrupt)) TIMER1_IRQHandler() {
+	*TIMER1_IFC = 1U; /* Clear interrupt flag */
 
 	snd_sampleTick();
-}
 
-void GPIO_IRQHandler(); /* Handle all buttons the same */
-
-/*
- * GPIO even pin interrupt handler 
- */
-void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler()
-{
-	GPIO_IRQHandler();
-	/*
-	 * TODO handle button pressed event, remember to clear pending
-	 * interrupt 
-	 */
-}
-
-/*
- * GPIO odd pin interrupt handler 
- */
-void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler()
-{
-	GPIO_IRQHandler();
-	/*
-	 * TODO handle button pressed event, remember to clear pending
-	 * interrupt 
-	 */
+	if (melody_done) {
+		*TIMER1_CMD = 0; // Disable timer
+		*SCR = 6U; // Sleep
+	}
 }
 
 void GPIO_IRQHandler() {
 	*GPIO_IFC = *GPIO_IF; /* Clear interrupt flag */
-	
+	*SCR = 4U; 		// Wake
+	*TIMER1_CMD = 1; // Enable timer
 	gpio_btn_handler();
+}
+
+void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler() {
+	GPIO_IRQHandler();
+}
+
+void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler() {
+	GPIO_IRQHandler();
 }
