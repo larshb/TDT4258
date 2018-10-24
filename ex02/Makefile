@@ -4,16 +4,20 @@ CC=arm-none-eabi-gcc
 LD=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
-CFLAGS=-mcpu=cortex-m3 -mthumb -g -std=c99 -Wall
+CFLAGS=-mcpu=cortex-m3 -mthumb -g -std=c99 -Wall -Ofast
 LDFLAGS=-mcpu=cortex-m3 -mthumb -g -lgcc -lc -lcs3 -lcs3unhosted -lefm32gg -Llib
 ASFLAGS=-mcpu=cortex-m3 -mthumb -g
 LINKERSCRIPT=lib/efm32gg.ld
 
+SOURCES=$(shell find -name "*.c")
+OBJECTS = $(SOURCES:.c=.o)
+
 bin/ex2.bin : bin/ex2.elf
 	${OBJCOPY} -O binary $< $@
 
-bin/ex2.elf : ex2.o dev/timer.o dev/dac.o dev/gpio.o \
-	interrupt_handlers.o audio/waves.o audio/sound.o audio/melodies.o audio/notes.o
+bin/ex2.elf : ex2.o $(OBJECTS) #ex2.o dev/timer.o dev/dac.o dev/gpio.o \
+	#interrupt_handlers.o audio/waves.o audio/sound.o audio/melodies.o audio/notes.o
+	
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS} 
 
 %.o : %.c
