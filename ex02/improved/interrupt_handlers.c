@@ -2,6 +2,11 @@
 #include "sound.h"
 #include "gpio.h"
 
+void enableDAC();
+void disableDAC();
+
+//#ifdef IMPROVED
+
 void __attribute__ ((interrupt)) TIMER1_IRQHandler() {
 	*TIMER1_IFC = 1U; /* Clear interrupt flag */
 
@@ -9,13 +14,15 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler() {
 
 	if (melody_done) {
 		*TIMER1_CMD = 0; // Disable timer
-		*SCR = 6U; // Sleep
+		*SCR = 6U; // Deep sleep and sleep on return from ISR
+
+		disableDAC();
 	}
 }
 
 void GPIO_IRQHandler() {
 	*GPIO_IFC = *GPIO_IF; /* Clear interrupt flag */
-	*SCR = 4U; 		// Wake
+	//*SCR = 4U; 		// Wake
 	*TIMER1_CMD = 1; // Enable timer
 	
 	/* Volume control */
@@ -43,18 +50,22 @@ void GPIO_IRQHandler() {
 
 	/* Sound effects */
 	if (gpio_btn_pressed(SW5)){
+		enableDAC();
 		snd_selectMelody(&mel_pitchfork);
 		while(gpio_btn_pressed(SW5)); /* Debounce */
 	}
 	if (gpio_btn_pressed(SW6)){
+		enableDAC();
 		snd_selectMelody(&mel_powerup);
 		while(gpio_btn_pressed(SW6)); /* Debounce */
 	}
 	if (gpio_btn_pressed(SW7)){
+		enableDAC();
 		snd_selectMelody(&mel_1up);
 		while(gpio_btn_pressed(SW7)); /* Debounce */
 	}
 	if (gpio_btn_pressed(SW8)){
+		enableDAC();
 		snd_selectMelody(&mel_powerdown);
 		while(gpio_btn_pressed(SW8)); /* Debounce */
 	}
@@ -67,3 +78,5 @@ void __attribute__ ((interrupt)) GPIO_EVEN_IRQHandler() {
 void __attribute__ ((interrupt)) GPIO_ODD_IRQHandler() {
 	GPIO_IRQHandler();
 }
+
+//#endif

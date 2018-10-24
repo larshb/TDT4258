@@ -1,27 +1,26 @@
-INCLUDE= -I. -Ilib -Idev -Iaudio
+INCLUDE= -I. -Ibase -Iimproved -Icommon -Icommon/lib -Icommon/dev -Icommon/audio
 
 CC=arm-none-eabi-gcc
 LD=arm-none-eabi-gcc
 OBJCOPY=arm-none-eabi-objcopy
 
 CFLAGS=-mcpu=cortex-m3 -mthumb -g -std=c99 -Wall -Ofast
-LDFLAGS=-mcpu=cortex-m3 -mthumb -g -lgcc -lc -lcs3 -lcs3unhosted -lefm32gg -Llib
+LDFLAGS=-mcpu=cortex-m3 -mthumb -g -lgcc -lc -lcs3 -lcs3unhosted -lefm32gg -Lcommon/lib
 ASFLAGS=-mcpu=cortex-m3 -mthumb -g
-LINKERSCRIPT=lib/efm32gg.ld
+LINKERSCRIPT=common/lib/efm32gg.ld
 
 SOURCES=$(shell find -name "*.c")
 OBJECTS = $(SOURCES:.c=.o)
+SOLUTION?=-DBASELINE
 
-bin/ex2.bin : bin/ex2.elf
+common/bin/ex2.bin : common/bin/ex2.elf
 	${OBJCOPY} -O binary $< $@
 
-bin/ex2.elf : ex2.o $(OBJECTS) #ex2.o dev/timer.o dev/dac.o dev/gpio.o \
-	#interrupt_handlers.o audio/waves.o audio/sound.o audio/melodies.o audio/notes.o
-	
+common/bin/ex2.elf : common/ex2.o $(OBJECTS)
 	${LD} -T ${LINKERSCRIPT} $^ -o $@ ${LDFLAGS} 
 
 %.o : %.c
-	${CC} ${CFLAGS} ${INCLUDE} -c $< -o $@
+	${CC} ${CFLAGS} ${SOLUTION} ${INCLUDE} -c $< -o $@
 
 .PHONY : pretty
 pretty :
@@ -29,14 +28,25 @@ pretty :
 
 .PHONY : upload
 upload :
-	-eACommander.sh -r --address 0x00000000 -f "bin/ex2.bin" -r
+	-eACommander.sh -r --address 0x00000000 -f "common/bin/ex2.bin" -r
 
 .PHONY : clean
 clean :
-	-rm -rfv *.o */*.o */*.elf */*.bin */*.hex 
+	-rm -rfv *.o */*.o */*/*.o */*/*.elf */*/*.bin */*/*.hex 
 
 .PHONY : rebuild
 rebuild :
 	make clean
 	make
 
+.PHONY : baseline
+baseline :
+	make clean
+	make
+	make upload
+
+.PHONY : improved
+improved :
+	make clean
+	make SOLUTION=-DIMPROVED
+	make upload
