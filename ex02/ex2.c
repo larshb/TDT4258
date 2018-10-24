@@ -1,84 +1,36 @@
-#include <stdint.h>
-#include <stdbool.h>
-
 #include "efm32gg.h"
 
 #include "gpio.h"
-#include "waves.h"
 #include "sound.h"
 
-/*
- * Declaration of peripheral setup functions 
- */
+/* Declaration of peripheral setup functions */
 void setupGPIO();
 void setupTimer(uint32_t period);
 void setupDAC();
 void setupNVIC();
+
 void polling();
 
-/*
- * Your code will start executing here 
- */
-int main(void)
-{
-	/*
-	 * Call the peripheral setup functions 
-	 */
+int main(void) {
 	setupGPIO();
 	setupDAC();
 	setupTimer(SAMPLE_PERIOD);
+	//polling();
+	
+	setupNVIC(); /* Enable interrupt handling */
 
-	snd_init();
-	polling();
-
-	/*
-	 * Enable interrupt handling 
-	 */
-	setupNVIC();
-
-	/*
-	 * TODO for higher energy efficiency, sleep while waiting for
-	 * interrupts instead of infinite loop for busy-waiting 
-	 */
-	while (1) ;
+	/* Low power */
+	*(EMU_CTRL+4) = 7; // Disable RAM
+	__asm("wfi");
 
 	return 0;
 }
 
 void setupNVIC()
 {
-	/*
-	 * TODO use the NVIC ISERx registers to enable handling of
-	 * interrupt(s) remember two things are necessary for interrupt
-	 * handling: - the peripheral must generate an interrupt signal - the
-	 * NVIC must be configured to make the CPU handle the signal You will
-	 * need TIMER1, GPIO odd and GPIO even interrupt handling for this
-	 * assignment. 
-	 */
-}
-
-/*
- * if other interrupt handlers are needed, use the following names:
- * NMI_Handler HardFault_Handler MemManage_Handler BusFault_Handler
- * UsageFault_Handler Reserved7_Handler Reserved8_Handler
- * Reserved9_Handler Reserved10_Handler SVC_Handler DebugMon_Handler
- * Reserved13_Handler PendSV_Handler SysTick_Handler DMA_IRQHandler
- * GPIO_EVEN_IRQHandler TIMER0_IRQHandler USART0_RX_IRQHandler
- * USART0_TX_IRQHandler USB_IRQHandler ACMP0_IRQHandler ADC0_IRQHandler
- * DAC0_IRQHandler I2C0_IRQHandler I2C1_IRQHandler GPIO_ODD_IRQHandler
- * TIMER1_IRQHandler TIMER2_IRQHandler TIMER3_IRQHandler
- * USART1_RX_IRQHandler USART1_TX_IRQHandler LESENSE_IRQHandler
- * USART2_RX_IRQHandler USART2_TX_IRQHandler UART0_RX_IRQHandler
- * UART0_TX_IRQHandler UART1_RX_IRQHandler UART1_TX_IRQHandler
- * LEUART0_IRQHandler LEUART1_IRQHandler LETIMER0_IRQHandler
- * PCNT0_IRQHandler PCNT1_IRQHandler PCNT2_IRQHandler RTC_IRQHandler
- * BURTC_IRQHandler CMU_IRQHandler VCMP_IRQHandler LCD_IRQHandler
- * MSC_IRQHandler AES_IRQHandler EBI_IRQHandler EMU_IRQHandler 
- */
-
-void busy_delay(uint8_t ticks) {
-	volatile uint8_t i;
-	for (i = 0; i < ticks; i++);
+	*ISER0 |=  1U << 12 |	/* Enable timer interrupts */
+			   1U <<  1 |	/* Enable GPIO even interrupts */
+			   1U << 11;    /* Enable GPIO odd interrupts */
 }
 
 void busy_sample_tick() {
@@ -88,30 +40,6 @@ void busy_sample_tick() {
 
 void polling() {
 	while(1) {
-		/* Play tone */
-		if (gpio_btn_pressed(SW6)) {
-			triangle(480);
-			audioOut();
-		}
-		if (gpio_btn_pressed(SW7)) {
-			sawtooth(480);
-			audioOut();
-		}
-		if (gpio_btn_pressed(SW8)) {
-			square(480);
-			audioOut();
-		}
-
-		/* Volume control */
-		if (gpio_btn_pressed(SW2) && snd_vol<100) {
-			snd_volAdjust(UP);
-			while(gpio_btn_pressed(SW2));
-		}
-		if (gpio_btn_pressed(SW4) && snd_vol>0){
-			snd_volAdjust(DOWN);
-			while(gpio_btn_pressed(SW4));
-		}
-
 		busy_sample_tick();
 	}
 }
