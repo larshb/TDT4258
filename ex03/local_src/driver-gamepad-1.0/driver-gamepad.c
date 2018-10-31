@@ -80,6 +80,8 @@ init(void) {
     device_create(c1, NULL, devno, NULL, DEVICE_NAME);
     iowrite32(2, GPIO_PA_CTRL);
     iowrite32(0x55555555, GPIO_PA_MODEH);
+
+    /* DEBUG Turn on all LEDs (only D5..7 works this way) */
     iowrite32(0x0000, GPIO_PA_DOUT);
     return 0;
 }
