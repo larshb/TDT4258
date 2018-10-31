@@ -22,7 +22,7 @@ void __attribute__ ((interrupt)) TIMER1_IRQHandler() {
 
 void GPIO_IRQHandler() {
 	*GPIO_IFC = *GPIO_IF; /* Clear interrupt flag */
-	//*SCR = 4U; 		// Wake
+	*SCR = 4U; 		// Wake
 	*TIMER1_CMD = 1; // Enable timer
 	
 	/* Volume control */
