@@ -1,5 +1,5 @@
 #include<stdio.h>
-//#include<stdlib.h>
+#include<stdlib.h>
 #include<stdint.h>
 #include<errno.h>
 #include<fcntl.h>
@@ -20,6 +20,15 @@
 static uint8_t btn_in;     ///< The receive buffer from the LKM
  
 int gamepad_test(){
+   /* Init gamepad */
+   /*FILE *fp;
+   char *command;
+   fp = popen(command,"w"); 
+   fprintf(fp,"mknod /dev/gamepad c 253 252; modprobe driver-gamepad");
+   fclose(fp);*/
+   system("mknod /dev/gamepad c 253 252");
+   system("modprobe driver-gamepad");
+
    int ret, fd, run;
    printf("Starting device test code example...\n");
    fd = open("/dev/gamepad", O_RDWR);             // Open the device with read/write access
