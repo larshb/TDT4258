@@ -1,6 +1,3 @@
-//
-// Created by didrik on 31.10.18.
-//
 #include <linux/kernel.h>
 #include <linux/module.h>
 #include <linux/init.h>
@@ -11,45 +8,48 @@
 #include <linux/moduleparam.h>
 #include <linux/kdev_t.h>
 #include <linux/ioport.h>
+#include <linux/interrupt.h>
 #include <asm/io.h>
 #include <asm/uaccess.h>
 #include <asm/signal.h>
 #include <asm/siginfo.h>
-#include <linux/interrupt.h>
 #include "efm32gg.h"
 
+MODULE_LICENSE("GPL");
+MODULE_AUTHOR("Group 31");
+MODULE_DESCRIPTION("Gamepad char device driver.");
+MODULE_VERSION("1.0");
 
 #define DEVICE_NAME "gamepad"
-/* User program opens the driver */
-static int open(struct inode *inode, struct file *filp);
-/* User program closes the driver */
-static int release(struct inode *inode);
-/*User program reads from the driver */
-static ssize_t read(struct file *filp, char __user *buff, size_t count, loff_t *offp);
-/*User program writes to the driver */
-static ssize_t write(struct file *filp, const char __user *buff, size_t count, loff_t *offp);
-/* File operations*/
+
+static int open(struct inode*, struct file*);
+static int release(struct inode*, struct file*);
+static ssize_t read(struct file *filp, char __user*, size_t, loff_t*);
+static ssize_t write(struct file *filp, const char __user*, size_t, loff_t*);
+
 static struct file_operations fops = {
-        .owner = THIS_MODULE,
-        .read = read,
-        .write = write,
-        .open = open,
-        .release = release
+        owner: THIS_MODULE,
+        read: read,
+        write: write,
+        open: open,
+        release: release
 };
-struct cdev cdev;     /* Pointer to operation structure */
+
+static int major;
+struct cdev cdev;   /* Pointer to operation structure */
 struct class *c1;   /* Device class */
-dev_t devno = 1;        /* Device number */
-/*
- * template_init - function to insert this module into kernel space
- *
- * This is the first of two exported functions to handle inserting this
- * code into a running kernel
- *
- * Returns 0 if successfull, otherwise -1
- */
-static int __init
-init(void) {
+dev_t devno = 1;    /* Device number */
+
+#define req_reg(reg, regstr, errno) \
+    if (!request_mem_region((unsigned long)reg, 1, DEVICE_NAME)) { \
+        printk(KERN_ALERT "Unable to request %s memory region!\n", regstr); \
+        return errno; \
+    }
+
+static int __init init(void) {
     printk("Loading module: %s \n", DEVICE_NAME);
+
+    major = register_chrdev(0, DEVICE_NAME, &fops);
 
     /* Allocate device number */
     if(alloc_chrdev_region(&devno, 0, 1, DEVICE_NAME)) {
@@ -57,43 +57,36 @@ init(void) {
         return 1;
     }
 
-    /* Allocate memory map */
-    if (!request_mem_region(GPIO_PC_MODEL, 1, DEVICE_NAME)) {
-        printk(KERN_ALERT "Unable to request GPIO_PC_MODEL memory region!\n");
-        return 2;
-    }
-    if (!request_mem_region(GPIO_PC_DOUT, 1, DEVICE_NAME)) {
-        printk(KERN_ALERT "Unable to request GPIO_PC_DOUT memory region!\n");
-        return 3;
-    }
-    if (!request_mem_region(GPIO_PC_DIN, 1, DEVICE_NAME)) {
-        printk(KERN_ALERT "Unable to request GPIO_PC_DIN memory region!\n");
-        return 4;
-    }
-
     /* Request memory region*/
-    //request_mem_region();
+    req_reg(GPIO_PC_MODEL, "lower GPIO PC", 2); // buttons
+    req_reg(GPIO_PC_DIN,   "GPIO PC data input", 3);
+    req_reg(GPIO_PA_MODEH, "higher GPIO PC", 4); // leds
+    req_reg(GPIO_PA_DOUT,  "GPIO PA data input", 5);
+
     /*Initialize cdev*/
     cdev_init(&cdev, &fops);
+
     /* Make driver appear as a file in the /dev directory */
     c1 = class_create(THIS_MODULE, DEVICE_NAME);
     device_create(c1, NULL, devno, NULL, DEVICE_NAME);
-    iowrite32(2, GPIO_PA_CTRL);
-    iowrite32(0x55555555, GPIO_PA_MODEH);
+
+    /* Configure registers */
+
+    /* Read buttons */
+    iowrite32(0x33333333, GPIO_PC_MODEL);
+    iowrite32(0xFF, GPIO_PC_DOUT);
 
     /* DEBUG Turn on all LEDs (only D5..7 works this way) */
+    iowrite32(2, GPIO_PA_CTRL);
+    iowrite32(0x55555555, GPIO_PA_MODEH);
     iowrite32(0x0000, GPIO_PA_DOUT);
+    
     return 0;
 }
-/*
- * template_cleanup - function to cleanup this module from kernel space
- *
- * This is the second of two exported functions to handle cleanup this
- * code from a running kernel
- */
-static void __exit
-cleanup(void) {
+
+static void __exit cleanup(void) {
     printk("Module stopped being used\n");
+    unregister_chrdev(major, DEVICE_NAME);
 }
 
 /* File operations */
@@ -103,18 +96,39 @@ static int open(struct inode *inode, struct file *filp){
     return 0;
 }
 
-static int release(struct inode *inode){
+static int release(struct inode* inode, struct file* file){
     printk("RELEASE\n");
     return 0;
 }
 
+/* From example */
+static char   message[256] = {0};
+static short  size_of_message;
+/***/
+
 static ssize_t read(struct file *filp, char __user *buff, size_t count, loff_t *offp){
-    printk("READ\n");
-    return (ssize_t)0;
+    //printk("READ: %s\n", buff);
+    /* From example
+    sprintf(message, "%s(%zu letters)", buff, count);   // appending received string with its length
+    size_of_message = strlen(message);                 // store the length of the stored message
+    printk(KERN_INFO "EBBChar: Received %zu characters from the user\n", count);
+    return count;*/
+    /***/
+    //put_user("Well, hello there!\n", buff);
+    uint32_t data = ioread32(GPIO_PC_DIN);
+    copy_to_user(buff, &data, 1);
+    printk(KERN_INFO "Read %u from buttons\n", data);
+    return (ssize_t)1;
 }
 
 static ssize_t write(struct file *filp, const char __user *buff, size_t count, loff_t *offp){
     printk("WRITE\n");
+    /* From example */
+    sprintf(message, "%s(%zu letters)", buff, count);   // appending received string with its length
+    size_of_message = strlen(message);                 // store the length of the stored message
+    printk(KERN_INFO "EBBChar: Received %zu characters from the user\n", count);
+    return count;
+    /***/
     return (ssize_t)0;
 }
 
@@ -122,5 +136,3 @@ static ssize_t write(struct file *filp, const char __user *buff, size_t count, l
 
 module_init(init);
 module_exit(cleanup);
-MODULE_DESCRIPTION("Gamepad char device driver.");
-MODULE_LICENSE("GPL");
