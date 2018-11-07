@@ -101,20 +101,7 @@ static int release(struct inode* inode, struct file* file){
     return 0;
 }
 
-/* From example */
-static char   message[256] = {0};
-static short  size_of_message;
-/***/
-
 static ssize_t read(struct file *filp, char __user *buff, size_t count, loff_t *offp){
-    //printk("READ: %s\n", buff);
-    /* From example
-    sprintf(message, "%s(%zu letters)", buff, count);   // appending received string with its length
-    size_of_message = strlen(message);                 // store the length of the stored message
-    printk(KERN_INFO "EBBChar: Received %zu characters from the user\n", count);
-    return count;*/
-    /***/
-    //put_user("Well, hello there!\n", buff);
     uint32_t data = ioread32(GPIO_PC_DIN);
     copy_to_user(buff, &data, 1);
     printk(KERN_INFO "Read %u from buttons\n", data);
@@ -122,17 +109,8 @@ static ssize_t read(struct file *filp, char __user *buff, size_t count, loff_t *
 }
 
 static ssize_t write(struct file *filp, const char __user *buff, size_t count, loff_t *offp){
-    printk("WRITE\n");
-    /* From example */
-    sprintf(message, "%s(%zu letters)", buff, count);   // appending received string with its length
-    size_of_message = strlen(message);                 // store the length of the stored message
-    printk(KERN_INFO "EBBChar: Received %zu characters from the user\n", count);
-    return count;
-    /***/
     return (ssize_t)0;
 }
-
-/***/
 
 module_init(init);
 module_exit(cleanup);
