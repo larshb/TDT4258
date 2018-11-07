@@ -33,7 +33,7 @@ int gamepad_init() {
 inline uint8_t gamepad_read() {
    static uint8_t btn_in;
    read(fd, &btn_in, 1);
-   return btn_in;
+   return ~btn_in;
 }
  
 int gamepad_test(){
