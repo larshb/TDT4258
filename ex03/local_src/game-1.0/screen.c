@@ -1,162 +1,60 @@
 #include <errno.h>
-#include <error.h>
 #include <fcntl.h>
 #include <linux/fb.h>
-#include <stdio.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
-#include <unistd.h>
 
-#include <stdlib.h>
-#include <string.h>
+#define FB_PATH "/dev/fb0"
+#define FB_UPDATE 0x4680
 
-#define SCREEN_ROWS 240
+int screen_fd;
+struct fb_copyarea screen_ca = {0, 0, 320, 240};
+uint16_t* screen_ar;
 
-int fbfd;
-struct fb_copyarea rect;
+uint16_t   RED = 0b1111100000000000;
+uint16_t WHITE = 0b1111111111111111;
+uint16_t  BLUE = 0b0000000000011111;
 
-typedef struct {
-	uint8_t r;//:5;
-	uint8_t g;//:5;
-	uint8_t b;//:6;
-} pixel_t;
-
-void pixel_merge(uint16_t* out, pixel_t* pixels, uint32_t n) {
-	uint32_t i;
-	for (i = 0; i < n; i++) {
-		pixel_t p = pixels[i];
-		out[i] = \
-		  ((p.r << 11) & 0b1111100000000000) \
-		| ((p.g << 5)  & 0b0000011111100000) \
-		| ((p.b)       & 0b0000000000011111);
-		printf("R:%x G:%x B:%x out:%x\n", p.r, p.g, p.b, out[i]);
+#define TRY(exp, str) \
+	if ((exp) < 0) { \
+		printf("ERROR: %s failed with error number %d\n", str, errno); \
+		return errno; \
 	}
-}
 
 int screen_init() {
-	rect.dx = 0;
-	rect.dy = 0;
-	rect.width = 320;
-	rect.height = 240;
-	fbfd = open("/dev/fb0", O_RDWR);
-	if (fbfd < 0){
-      perror("Failed to open frame buffer file...");
-      return errno;
-   	}
+	screen_fd = open(FB_PATH, O_RDWR);
+	TRY(screen_fd, "Opening screen file");
+   	screen_ar = mmap(NULL, 320*240*2, PROT_READ | PROT_WRITE, MAP_SHARED, screen_fd, 0);
+	TRY(screen_ar, "Memory mapping screen")
    	return 0;
 }
 
-int init_framebuffer();
+inline int screen_refresh() {
+	TRY(ioctl(screen_fd, FB_UPDATE, &screen_ca), "Refreshing screen");
+	return 0;
+}
 
-inline void screen_refresh() {
-	ioctl(fbfd, 0x4680, &rect);
+void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) {
+	uint16_t r, c;
+	for (r = x0; r < x1; r++) {
+		for (c = y0; c < y1; c++) {
+			screen_ar[c*320+r] = color;
+		}
+	}
+}
+
+void draw_flag() {
+	draw_rectangle(   0,    0,   320,   240, RED);
+	draw_rectangle(   0, 15*6,   320, 15*10, WHITE);
+	draw_rectangle(15*6,    0, 15*10,   240, WHITE);
+	draw_rectangle(   0, 15*7,   320,  15*9, BLUE);
+	draw_rectangle(15*7,    0,  15*9,   240, BLUE);
 }
 
 void screen_test() {
-	//init_framebuffer();
-	//ioctl(fbfd, 0x4680, &rect);
-	//return;
-	pixel_t red = {31, 0, 0};
-	uint16_t red_out;
-	pixel_merge(&red_out, &red, 1);
-	printf("Red: %x\n", red_out);
 	screen_init();
-	
-
-	pixel_t pixels[] = {
-		{.r=31, 0, 0},
-		{ 0,31, 0},
-		{ 0, 0,31},
-		{31, 0, 0},
-		{ 0,31, 0},
-		{ 0, 0,31},
-		{31, 0, 0},
-		{ 0,31, 0},
-		{ 0, 0,31},
-		{31, 0, 0},
-		{ 0,31, 0},
-		{ 0, 0,31}
-	};
-	int i, j;
-	uint16_t pixels_out[12];
-	pixel_merge(pixels_out, pixels, 12);
-	/*uint16_t screen[320*6];
-	for (i = 0; i < 320*6; i+=12){
-		for (j = 0; j < 12; j++) {
-			screen[i+j]=pixels_out[j];
-		}
-	}
-	write(fbfd, (char*)screen, 320*6*2);*/
-
-	uint16_t* screen = mmap(NULL, 320*SCREEN_ROWS*2, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
-	if (screen < 0) {
-		printf("mmap returned error %d", errno);
-		return;
-	}/*
-	screen[0] = 0xFFFF;
-	screen[1] = 0xFFFF;
-	screen[2] = 0xFFFF;
-	screen[3] = 0xFFFF;
-	screen[4] = 0xFFFF;
-	screen[5] = 0xFFFF;
-	screen[6] = 0xFFFF;
-	screen[7] = 0xFFFF;
-	screen[8] = 0xFFFF;*/
-	for (i = 0; i < 320*SCREEN_ROWS/12; i++) {
-		for (j = 0; j < 12; j++) {
-			screen[i*12+j] = i;//pixels_out[j];
-		}
-	}
+	draw_flag();
 	screen_refresh();
-}
-
-uint16_t* fbp;
-int screensize_pixels;
-int screensize_bytes;
-
-struct fb_var_screeninfo vinfo;
-struct fb_copyarea screen;
-
-int init_framebuffer()
-{
-    fbfd = open("/dev/fb0", O_RDWR);
-    if (fbfd == -1) {
-        printf("Error: unable to open framebuffer device.\n");
-        return -1;
-    }
-
-    // Get screen size info
-    if (ioctl(fbfd, FBIOGET_VSCREENINFO, &vinfo) == -1) {
-        printf("Error: unable to get screen info.\n");
-        return -1;
-    }
-    printf("Screeninfo: %d x %d, %dbpp\n", vinfo.xres, vinfo.yres, vinfo.bits_per_pixel);
-
-    screen.dx = 0;
-    screen.dy = 0;
-    screen.width = vinfo.xres;
-    screen.height = vinfo.yres;
-
-    screensize_pixels = vinfo.xres * vinfo.yres;
-    screensize_bytes = screensize_pixels * vinfo.bits_per_pixel / 8;
-
-    fbp = (char*)mmap(0, screensize_bytes, PROT_READ | PROT_WRITE, MAP_SHARED, fbfd, 0);
-    if (fbp == MAP_FAILED) {
-        printf("Error: failed to memorymap framebuffer.\n");
-        return -1;
-    }
-
-    int i;
-    for (i = 0; i < screensize_pixels; i++) {
-        fbp[i] = 0xFFFF;
-        ioctl(fbfd, 0x4680, &rect);
-    }
-
-
-    char command[250*320];
-    sprintf(command, "echo %s > /dev/fb0", (char*)fbp);
-    system(command);
-
-    return 0;
 }

@@ -1,0 +1,16 @@
+typedef struct {
+	uint8_t r:5; // max 31
+	uint8_t g:6; // max 63
+	uint8_t b:5; // max 31
+} pixel_t;
+
+void pixel_fuse(uint16_t* out, pixel_t* pixels, uint32_t n) {
+	uint32_t i;
+	for (i = 0; i < n; i++) {
+		pixel_t p = pixels[i];
+		out[i] = \
+		  ((p.r << 11) & 0b1111100000000000) \
+		| ((p.g << 5)  & 0b0000011111100000) \
+		| ((p.b)       & 0b0000000000011111);
+	}
+}

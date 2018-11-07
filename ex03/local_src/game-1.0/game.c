@@ -3,7 +3,6 @@
 
 //#include "gamepad.c"
 #include "screen.c"
-//#include "framebuffer.c"
 
 int main(int argc, char *argv[])
 {
@@ -11,7 +10,6 @@ int main(int argc, char *argv[])
 
 	//gamepad_test();
 	screen_test();
-	//framebuffer_test();
 
 	exit(EXIT_SUCCESS);
 }
