@@ -178,6 +178,7 @@ int snake_play() {
 	}
 
 	uint8_t btns = 0;
+	uint8_t delay_factor = 10;
 	while (1) {//(!(btns & MSK_SW4)) { //Exit
 
 		if (btns & MSK_SW1) {
@@ -191,6 +192,18 @@ int snake_play() {
 		}
 		if (btns & MSK_SW4) {
 			snake_turn(&snake, DOWN);
+		}
+
+		/* Cheats */
+
+		/* Speed */
+		if (btns & MSK_SW5) {
+			/* Slow down */
+			delay_factor++;
+		}
+		if (btns & MSK_SW7) {
+			/* Speed up */
+			delay_factor=delay_factor==0?0:delay_factor-1;
 		}
 
 		/* Eat food if head in same location
@@ -211,12 +224,11 @@ int snake_play() {
 			}
 		}
 		
-		
 		//screen_clear(); // Not optimal
 		food_draw(&food);
 		snake_draw(&snake);
 		//screen_refresh();
-		usleep((int)1e5);
+		usleep((int)1e4*delay_factor);
 		btns = gamepad_read();
 	}
 	return 0;
