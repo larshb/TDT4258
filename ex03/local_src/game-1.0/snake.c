@@ -1,27 +1,24 @@
 #include "screen.h"
 
-#include <stdint.h>
-#include <stdio.h> //DEBUG
-#include <stdlib.h>
-#include <malloc.h> //bad?
-#include <unistd.h>
-#include <time.h>
+#include <stdint.h> // uint8_t ...
+#include <stdlib.h> // random()
+#include <malloc.h> // malloc()
+#include <time.h>   // time()
 
 /* TODO
- * Fix out of bounds, modulo on negative numbers does not seem fit
  * Consider adding cheats
  */
 
 typedef struct {
 	int8_t x;
 	int8_t y;
-} coord_t;
+} coords_t;
 
-typedef coord_t food_t;
+typedef coords_t food_t;
 
 /* "Body parts" */
 typedef struct node {
-	coord_t coords;
+	coords_t coords;
 	struct node* next;
 } node_t;
 
@@ -31,13 +28,13 @@ typedef struct snake {
 	node_t* head;
 	node_t* tail;
 	dir_t dir;
-	//void (*grow)(struct snake*);
 } snake_t;
 
 /* Add new snake-head according to moving direction */
 int snake_grow(snake_t* snake) {
+	/* Add new head according to direction, and wrap around screen edges */
 	dir_t* d = &snake->dir;
-	coord_t c = snake->head->coords;
+	coords_t c = snake->head->coords;
 	node_t* new_head = malloc(sizeof(node_t));
 	new_head->next = snake->head;
 	new_head->coords.x = (
@@ -87,9 +84,6 @@ int snake_move(snake_t* snake) {
 	while(new_tail->next != snake->tail) {
 		new_tail = new_tail->next;
 	}
-	// while(new_tail->next->next != NULL) {
-	// 	new_tail = new_tail->next;
-	// }
 
 	new_tail->next = NULL;
 
@@ -97,9 +91,11 @@ int snake_move(snake_t* snake) {
 	//free(snake->tail);
 
 	snake->tail = new_tail;
+
+	return 0;
 }
 
-inline void square_draw(coord_t* c, uint16_t color) {
+inline void square_draw(coords_t* c, uint16_t color) {
 	draw_rectangle(c->x*16, c->y*16, c->x*16+15, c->y*16+15, color);
 }
 
@@ -107,7 +103,7 @@ void snake_draw(snake_t* snake) {
 	/* FIXME Optimize redrawing only head and tail */
 	node_t* node = snake->head;
 	while (node != NULL) {
-		coord_t* c = &node->coords;
+		coords_t* c = &node->coords;
 		square_draw(c, RED);
 		node = node->next;
 	}
@@ -149,6 +145,7 @@ enum btn_msk {
 int snake_play() {
 
 	gamepad_init();
+	screen_init();
 	screen_clear();
 
 	srand(time(NULL));   // Initialization, should only be called once.
@@ -156,11 +153,9 @@ int snake_play() {
 	food_t food;
 	food_move(&food);
 
-	puts("Snake started");
 	/* Init */
 	snake_t snake;
 	//snake.grow = snake_grow;
-	puts("Snake created");
 
 	node_t tail = {
 		.coords = {5,5},
@@ -174,30 +169,24 @@ int snake_play() {
 	snake.tail = &tail;
 	snake.dir = RIGHT;
 
-	puts("Nodes assigned");
-
-	int i;//, j;
+	int i;
 	for (i = 0; i < 5; i++) {
 		snake_grow(&snake);	
 	}
-	puts("Grew snake");
-	
-	screen_init();
-	puts("Initialized screen");
 
 	uint8_t btns = 0;
 	while (1) {//(!(btns & MSK_SW4)) { //Exit
 
-		if (btns & MSK_SW5) {
+		if (btns & MSK_SW1) {
 			snake_turn(&snake, LEFT);
 		}
-		if (btns & MSK_SW6) {
+		if (btns & MSK_SW2) {
 			snake_turn(&snake, UP);
 		}
-		if (btns & MSK_SW7) {
+		if (btns & MSK_SW3) {
 			snake_turn(&snake, RIGHT);
 		}
-		if (btns & MSK_SW8) {
+		if (btns & MSK_SW4) {
 			snake_turn(&snake, DOWN);
 		}
 
@@ -223,10 +212,7 @@ int snake_play() {
 		screen_clear(); // Not optimal
 		food_draw(&food);
 		snake_draw(&snake);
-		//puts("Drew snake");
-
 		screen_refresh();
-		//puts("Refreshed screen");
 		//usleep((int)1e5);
 		btns = gamepad_read();
 	}
