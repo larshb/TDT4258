@@ -1,11 +1,3 @@
-#
-# Simple development makefile
-#
-
-#
-# add more flags here,
-# but don't remove the "+="
-#
 CFLAGS += -D_GNU_SOURCE -O2 -g -Wall -lm #-Wsign-compare -Wfloat-equal -Wformat-security #-Werror
 CPPFLAGS += 
 LDFLAGS += 
@@ -29,5 +21,3 @@ rebuild:
 	make
 
 .PHONY: all install clean rebuild
-
-# end of development makefile
