@@ -1,7 +1,8 @@
+#include "screen.h"
+
 #include <errno.h>
 #include <fcntl.h>
 #include <linux/fb.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/mman.h>
@@ -16,18 +17,6 @@
 int screen_fd;
 struct fb_copyarea screen_ca = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
 uint16_t* screen_ar;
-
-#define  WHITE 0b1111111111111111
-#define  BLACK 0b0000000000000000
-
-#define    RED 0b1111100000000000
-#define YELLOW 0b1111111111100000
-#define  GREEN 0b0000011111100000
-#define   CYAN 0b0000011111111111
-#define   BLUE 0b0000000000011111
-#define PURPLE 0b1111100000011111
-
-#define   SKIN 0b1111111001010110
 
 
 #define TRY(exp, str) \
@@ -49,6 +38,8 @@ inline int screen_refresh() {
 	TRY(ioctl(screen_fd, FB_UPDATE_CMD, &screen_ca), "Refreshing screen");
 	return 0;
 }
+
+/* Testing features: */
 
 void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) {
 	uint16_t r, c;

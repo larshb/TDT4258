@@ -104,7 +104,7 @@ static int release(struct inode* inode, struct file* file){
 static ssize_t read(struct file *filp, char __user *buff, size_t count, loff_t *offp){
     uint32_t data = ioread32(GPIO_PC_DIN);
     copy_to_user(buff, &data, 1);
-    printk(KERN_INFO "Read %u from buttons\n", data);
+    //printk(KERN_INFO "Read %u from buttons\n", data);
     return (ssize_t)1;
 }
 
