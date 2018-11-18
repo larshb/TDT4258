@@ -77,9 +77,9 @@ static int __init init(void) {
     iowrite32(0xFF, GPIO_PC_DOUT);
 
     /* DEBUG Turn on all LEDs (only D5..7 works this way) */
-    iowrite32(2, GPIO_PA_CTRL);
-    iowrite32(0x55555555, GPIO_PA_MODEH);
-    iowrite32(0x0000, GPIO_PA_DOUT);
+    //iowrite32(2, GPIO_PA_CTRL);
+    //iowrite32(0x55555555, GPIO_PA_MODEH);
+    //iowrite32(0x0000, GPIO_PA_DOUT);
     
     return 0;
 }
