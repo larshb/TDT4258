@@ -39,6 +39,12 @@ inline int screen_refresh() {
 	return 0;
 }
 
+inline int screen_refresh_area(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+	struct fb_copyarea area = {x0, y0, x1, y1};
+	TRY(ioctl(screen_fd, FB_UPDATE_CMD, &area), "Refreshing screen");
+	return 0;
+}
+
 /* Testing features: */
 
 void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) {
@@ -48,6 +54,7 @@ void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t
 			screen_ar[c*SCREEN_WIDTH+r] = color;
 		}
 	}
+	screen_refresh_area(x0, y0, x1-x0, y1-y0);
 }
 
 /* Draw block of data from upper-left [x/y] with dimensions [dx/dy] */

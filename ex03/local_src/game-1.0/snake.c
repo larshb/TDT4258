@@ -4,6 +4,7 @@
 #include <stdlib.h> // random()
 #include <malloc.h> // malloc()
 #include <time.h>   // time()
+#include <unistd.h>
 
 /* TODO
  * Consider adding cheats
@@ -69,6 +70,10 @@ int snake_grow(snake_t* snake) {
 	return 0;
 }
 
+inline void square_draw(coords_t* c, uint16_t color) {
+	draw_rectangle(c->x*16, c->y*16, c->x*16+15, c->y*16+15, color);
+}
+
 int snake_move(snake_t* snake) {
 	if (snake_grow(snake) != 0) {
 		return -1;
@@ -90,21 +95,18 @@ int snake_move(snake_t* snake) {
 	/* FIXME memory leak? */
 	//free(snake->tail);
 
+	square_draw(&snake->tail->coords, BLACK);
 	snake->tail = new_tail;
 
 	return 0;
 }
 
-inline void square_draw(coords_t* c, uint16_t color) {
-	draw_rectangle(c->x*16, c->y*16, c->x*16+15, c->y*16+15, color);
-}
-
 void snake_draw(snake_t* snake) {
 	/* FIXME Optimize redrawing only head and tail */
 	node_t* node = snake->head;
+	square_draw(&node->coords, RED);
 	while (node != NULL) {
 		coords_t* c = &node->coords;
-		square_draw(c, RED);
 		node = node->next;
 	}
 }
@@ -147,6 +149,7 @@ int snake_play() {
 	gamepad_init();
 	screen_init();
 	screen_clear();
+	draw_rectangle(0,0,320,240, WHITE);
 
 	srand(time(NULL));   // Initialization, should only be called once.
 
@@ -209,11 +212,11 @@ int snake_play() {
 		}
 		
 		
-		screen_clear(); // Not optimal
+		//screen_clear(); // Not optimal
 		food_draw(&food);
 		snake_draw(&snake);
-		screen_refresh();
-		//usleep((int)1e5);
+		//screen_refresh();
+		usleep((int)1e5);
 		btns = gamepad_read();
 	}
 	return 0;
