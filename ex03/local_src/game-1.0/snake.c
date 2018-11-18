@@ -31,6 +31,10 @@ typedef struct snake {
 	dir_t dir;
 } snake_t;
 
+inline void square_draw(coords_t* c, uint16_t color) {
+	draw_rectangle(c->x*16, c->y*16, c->x*16+15, c->y*16+15, color);
+}
+
 /* Add new snake-head according to moving direction */
 int snake_grow(snake_t* snake) {
 	/* Add new head according to direction, and wrap around screen edges */
@@ -55,6 +59,7 @@ int snake_grow(snake_t* snake) {
 			)
 		);
 	snake->head = new_head;
+	square_draw(&new_head->coords, RED);
 
 	/* Check for collision */
 	node_t* node = snake->head->next;
@@ -70,17 +75,8 @@ int snake_grow(snake_t* snake) {
 	return 0;
 }
 
-inline void square_draw(coords_t* c, uint16_t color) {
-	draw_rectangle(c->x*16, c->y*16, c->x*16+15, c->y*16+15, color);
-}
-
-int snake_move(snake_t* snake) {
-	if (snake_grow(snake) != 0) {
-		return -1;
-	}
-
-	/* Trim tail */
-
+/* Trim snake's tail */
+int snake_trim(snake_t* snake) {
 	/* Find next to last node
 	 * FIXME Consider adding pointer to previous node
 	 * so the following scan is not needed
@@ -97,18 +93,11 @@ int snake_move(snake_t* snake) {
 
 	square_draw(&snake->tail->coords, BLACK);
 	snake->tail = new_tail;
-
 	return 0;
 }
 
-void snake_draw(snake_t* snake) {
-	/* FIXME Optimize redrawing only head and tail */
-	node_t* node = snake->head;
-	square_draw(&node->coords, RED);
-	while (node != NULL) {
-		coords_t* c = &node->coords;
-		node = node->next;
-	}
+int snake_move(snake_t* snake) {
+	return (snake_grow(snake) == 0 && snake_trim(snake) == 0) ? 0 : -1;
 }
 
 void snake_turn(snake_t* snake, dir_t dir) {
@@ -123,9 +112,6 @@ void snake_turn(snake_t* snake, dir_t dir) {
 void food_move(food_t* food) {
 	food->x = random()%20;
 	food->y = random()%15;
-}
-
-void food_draw(food_t* food) {
 	square_draw(food, YELLOW);
 }
 
@@ -200,10 +186,18 @@ int snake_play() {
 		if (btns & MSK_SW5) {
 			/* Slow down */
 			delay_factor++;
-		}
+		}	
 		if (btns & MSK_SW7) {
 			/* Speed up */
 			delay_factor=delay_factor==0?0:delay_factor-1;
+		}
+
+		/* Length */
+		if (btns & MSK_SW6) {
+			snake_grow(&snake);
+		}
+		else if (btns & MSK_SW8) {
+			snake_trim(&snake);
 		}
 
 		/* Eat food if head in same location
@@ -224,11 +218,8 @@ int snake_play() {
 			}
 		}
 		
-		//screen_clear(); // Not optimal
-		food_draw(&food);
-		snake_draw(&snake);
-		//screen_refresh();
 		usleep((int)1e4*delay_factor);
+
 		btns = gamepad_read();
 	}
 	return 0;
