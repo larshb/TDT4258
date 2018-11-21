@@ -176,6 +176,8 @@ int snake_play() {
 	uint8_t delay_factor = 10;
 	while (1) {//(!(btns & MSK_SW4)) { //Exit
 
+		square_draw(&food, YELLOW); /* Just in case food spawns under snake */
+
 		if (btns & MSK_SW1) {
 			snake_turn(&snake, LEFT);
 		}
@@ -216,10 +218,10 @@ int snake_play() {
 			snake.head->coords.y == food.y)
 		{
 			sprintf(score_str, "Score: %05d", score++);
-			food_move(&food);
 			if (snake_grow(&snake) != 0) {
 				return -1;
 			}
+			food_move(&food);
 		}
 		else
 		{
@@ -227,6 +229,7 @@ int snake_play() {
 				return -2;
 			}
 		}
+
 
 		screen_print(score_str, 29, 29);
 		
