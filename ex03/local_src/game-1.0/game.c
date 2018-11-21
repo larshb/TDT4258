@@ -1,17 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+void font_init();
+void screen_init();
+void screen_clear();
+int gamepad_init();
+
 int snake_play();
-void screen_test();
+void animate_diamond();
 void darth_plagueis();
 
 int main(int argc, char *argv[])
 {
 	printf("Hello World, I'm game!\n");
 
-	// screen_test();
-	// exit(0);
+	gamepad_init();
+	font_init();
+	screen_init();
+	screen_clear();
 
+	animate_diamond();
+
+	screen_clear();
 	if( snake_play()!=0 ) {
 		puts(" __   __                        _                                                  _    __   _ ");
 		puts(" \\ \\ / /  ___   _  _     __ _  | |_   ___     _  _   ___   _  _   _ _   ___  ___  | |  / _| | |");

@@ -123,62 +123,35 @@ typedef struct {
 
 void animate_diamond() {
 	int t;
-	for (;;) {
-		for (t = 0; t < 40; t++) {
-			screen_clear();
-			coords_t a, b, c, d, e, f;
-			a.x = 160-cosine[t]/5;
-			a.y = 10;
-			b.x = 160+cosine[t];
-			b.y = 100;
-			c.x = 160+cosine[t]/5;
-			c.y = 230;
-			d.x = 160-cosine[t];
-			d.y = 140;
-			e.x = 160+sine[t];
-			e.y = 120;
-			f.x = 160-sine[t];
-			f.y = 120;
-			draw_line(a.x, a.y, b.x, b.y, YELLOW);
-			draw_line(b.x, b.y, c.x, c.y, YELLOW);
-			draw_line(a.x, a.y, d.x, d.y, YELLOW);
-			draw_line(d.x, d.y, c.x, c.y, YELLOW);
-			draw_line(a.x, a.y, e.x, e.y, YELLOW);
-			draw_line(e.x, e.y, c.x, c.y, YELLOW);
-			draw_line(a.x, a.y, f.x, f.y, YELLOW);
-			draw_line(f.x, f.y, c.x, c.y, YELLOW);
-			draw_line(b.x, b.y, e.x, e.y, YELLOW);
-			draw_line(e.x, e.y, d.x, d.y, YELLOW);
-			draw_line(d.x, d.y, f.x, f.y, YELLOW);
-			draw_line(f.x, f.y, b.x, b.y, YELLOW);
-			screen_refresh();
-		}
-	}
-}
-
-void draw_gridlines() {
-	int r, c;
-	for (r = 0; r < 320; r+=2) {
-		for (c = 0; c < 240; c+=2) {
-			draw_line(0,c,r,c, RED); //UL
-			draw_line(r,0,r,c, BLUE); //UL
-		}
+	for (t = 0; t < 40; t++) {
+		screen_clear();
+		coords_t a, b, c, d, e, f;
+		a.x = 160-cosine[t]/5;
+		a.y = 10;
+		b.x = 160+cosine[t];
+		b.y = 100;
+		c.x = 160+cosine[t]/5;
+		c.y = 230;
+		d.x = 160-cosine[t];
+		d.y = 140;
+		e.x = 160+sine[t];
+		e.y = 120;
+		f.x = 160-sine[t];
+		f.y = 120;
+		draw_line(a.x, a.y, b.x, b.y, YELLOW);
+		draw_line(b.x, b.y, c.x, c.y, YELLOW);
+		draw_line(a.x, a.y, d.x, d.y, YELLOW);
+		draw_line(d.x, d.y, c.x, c.y, YELLOW);
+		draw_line(a.x, a.y, e.x, e.y, YELLOW);
+		draw_line(e.x, e.y, c.x, c.y, YELLOW);
+		draw_line(a.x, a.y, f.x, f.y, YELLOW);
+		draw_line(f.x, f.y, c.x, c.y, YELLOW);
+		draw_line(b.x, b.y, e.x, e.y, YELLOW);
+		draw_line(e.x, e.y, d.x, d.y, YELLOW);
+		draw_line(d.x, d.y, f.x, f.y, YELLOW);
+		draw_line(f.x, f.y, b.x, b.y, YELLOW);
 		screen_refresh();
 	}
-}
-
-void draw_corners() {
-	draw_line(0,0,10,10,RED); //UL
-	draw_line(309,10,319,0, BLACK); //UR
-	draw_line(0,239,10,229, BLUE); //LL
-	draw_line(319,239,309,229, SKIN); //LR
-}
-
-void draw_mario() {
-	char mario_str[16*16] = {"WWWWWBBBBBWWWWWWWWWWBRRRRRBBBWWWWWWBRRRRRRRRRBWWWWWBBBSSBSBBBWWWWWBSSBBSBSBBBWWWWWBSSBBBSSBBBWWWWWWBBSSSBBBBBWWWWWWBBBSSSSSBWWWWWBBRRRBBRRBBBWWWBSSRRRBBRRBRBWWWBSSSRRBBBBBBRSBWWBSSBBBBSBBSBSBWWWBBBBBBBBBRRBWWWBRRBBBBBBRRRBWWWBRRRBWWBRRRBWWWWWBBBWWWWBBBWWWW"};
-	uint16_t mario[16*16];
-	cdraw(mario, mario_str, 16*16);
-	draw_block(mario, 160, 120, 16, 16);
 }
 
 uint16_t* font_getsymbol(char c);
@@ -233,21 +206,4 @@ void darth_plagueis() {
 	screen_print("in his sleep. It's ironic he could    ",0,r++);
 	screen_print("save others from death, but not       ",0,r++);
 	screen_print("himself.                              ",0,r++);
-}
-
-void font_init();
-
-void screen_test() {
-	screen_init();
-	font_init();
-	//animate_diamond();
-	//ascii_table();
-
-	//draw_mario();
-
-	//screen_print("Hade bra, Didrik!", 5, 5);
-
-	darth_plagueis();
-
-	screen_refresh();
 }

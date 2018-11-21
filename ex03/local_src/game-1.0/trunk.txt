@@ -14,3 +14,29 @@ void pixel_fuse(uint16_t* out, pixel_t* pixels, uint32_t n) {
 		| ((p.b)       & 0b0000000000011111);
 	}
 }
+
+void draw_gridlines() {
+	int r, c;
+	for (r = 0; r < 320; r+=2) {
+		for (c = 0; c < 240; c+=2) {
+			draw_line(0,c,r,c, RED); //UL
+			draw_line(r,0,r,c, BLUE); //UL
+		}
+		screen_refresh();
+	}
+}
+
+void draw_corners() {
+	draw_line(0,0,10,10,RED); //UL
+	draw_line(309,10,319,0, BLACK); //UR
+	draw_line(0,239,10,229, BLUE); //LL
+	draw_line(319,239,309,229, SKIN); //LR
+}
+
+void draw_mario() {
+	char mario_str[16*16] = {"WWWWWBBBBBWWWWWWWWWWBRRRRRBBBWWWWWWBRRRRRRRRRBWWWWWBBBSSBSBBBWWWWWBSSBBSBSBBBWWWWWBSSBBBSSBBBWWWWWWBBSSSBBBBBWWWWWWBBBSSSSSBWWWWWBBRRRBBRRBBBWWWBSSRRRBBRRBRBWWWBSSSRRBBBBBBRSBWWBSSBBBBSBBSBSBWWWBBBBBBBBBRRBWWWBRRBBBBBBRRRBWWWBRRRBWWBRRRBWWWWWBBBWWWWBBBWWWW"};
+	uint16_t mario[16*16];
+	cdraw(mario, mario_str, 16*16);
+	draw_block(mario, 160, 120, 16, 16);
+}
+

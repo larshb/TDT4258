@@ -32,6 +32,8 @@ typedef struct snake {
 	dir_t dir;
 } snake_t;
 
+food_t food; /* FIXME Should not need to be a global */
+
 inline void square_draw(coords_t* c, uint16_t color) {
 	draw_rectangle(c->x*16, c->y*16, c->x*16+15, c->y*16+15, color);
 }
@@ -55,8 +57,8 @@ int snake_grow(snake_t* snake) {
 		(*d == LEFT || *d == RIGHT)
 		? c.y
 		: (*d == DOWN
-			? (c.y==14?0:c.y+1) // MAGIC NUMBER (15*16 screen height)
-			: (c.y==0?14:c.y-1) // MAGIC NUMBER
+			? (c.y==13?0:c.y+1) // MAGIC NUMBER (15*16 screen height)
+			: (c.y==0?13:c.y-1) // MAGIC NUMBER
 			)
 		);
 	snake->head = new_head;
@@ -93,7 +95,13 @@ int snake_trim(snake_t* snake) {
 	//free(snake->tail);
 
 	square_draw(&snake->tail->coords, BLACK);
+
+	/* Quickfix just in case food spawns under snake */
+	if (snake->tail->coords.x == food.x && snake->tail->coords.y == food.y)
+		square_draw(&food, YELLOW);
+
 	snake->tail = new_tail;
+
 	return 0;
 }
 
@@ -116,10 +124,8 @@ void food_move(food_t* food) {
 	square_draw(food, YELLOW);
 }
 
-int gamepad_init();
 int gamepad_read();
 void screen_print(char*, uint8_t, uint8_t);
-void font_init();
 
 /* Bitfield masks for buttons */
 enum btn_msk {
@@ -135,20 +141,14 @@ enum btn_msk {
 
 int snake_play() {
 
-	gamepad_init();
-	font_init();
-	screen_init();
-	screen_clear();
 	//draw_rectangle(0,0,320,240, WHITE); /* Christmas mode */
 
 	uint16_t score = 0;
 	char score_str[30] = {0};
 	sprintf(score_str, "Score: 00000");
-	screen_print(score_str, 28, 29);
 
 	srand(time(NULL));
 
-	food_t food;
 	food_move(&food);
 
 	/* Init */
@@ -175,8 +175,6 @@ int snake_play() {
 	uint8_t btns = 0;
 	uint8_t delay_factor = 10;
 	while (1) {//(!(btns & MSK_SW4)) { //Exit
-
-		square_draw(&food, YELLOW); /* Just in case food spawns under snake */
 
 		if (btns & MSK_SW1) {
 			snake_turn(&snake, LEFT);
@@ -231,7 +229,7 @@ int snake_play() {
 		}
 
 
-		screen_print(score_str, 29, 29);
+		screen_print(score_str, 28, 29);
 		
 		usleep((int)1e4*delay_factor);
 
