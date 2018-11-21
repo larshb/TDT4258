@@ -106,7 +106,8 @@ int snake_trim(snake_t* snake) {
 }
 
 int snake_move(snake_t* snake) {
-	return (snake_grow(snake) == 0 && snake_trim(snake) == 0) ? 0 : -1;
+	snake_trim(snake);
+	return (snake_grow(snake) == 0) ? 0 : -1;
 }
 
 void snake_turn(snake_t* snake, dir_t dir) {
@@ -120,7 +121,7 @@ void snake_turn(snake_t* snake, dir_t dir) {
 
 void food_move(food_t* food) {
 	food->x = random()%20;
-	food->y = random()%15;
+	food->y = random()%13+1;
 	square_draw(food, YELLOW);
 }
 

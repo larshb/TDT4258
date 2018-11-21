@@ -14,12 +14,11 @@ int main(int argc, char *argv[])
 {
 	printf("Hello World, I'm game!\n");
 
+	screen_init();
+	//animate_diamond(); /* FIXME Slow af */
+
 	gamepad_init();
 	font_init();
-	screen_init();
-	screen_clear();
-
-	animate_diamond();
 
 	screen_clear();
 	if( snake_play()!=0 ) {
