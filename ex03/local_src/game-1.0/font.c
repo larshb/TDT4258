@@ -135,6 +135,7 @@ uint8_t ascii8[N_SYMBOLS][8] = {
 
 uint16_t ascii8pixels[N_SYMBOLS][8*8];
 
+/* Convert "1-bit per pixel" array to "16 bit per pixel" array */
 void font_init() {
 	int i, r, c;
 	for (i = 0; i < N_SYMBOLS; i++) {
@@ -146,6 +147,7 @@ void font_init() {
 	}
 }
 
+/* ASCII character to 16-bit 8x8 pixel array */
 uint16_t* font_getsymbol(char c) {
 	return ascii8pixels[(int)c];
 }

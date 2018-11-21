@@ -5,7 +5,7 @@
 #include <stdio.h>  // sprinft()
 #include <malloc.h> // malloc()
 #include <time.h>   // time()
-#include <unistd.h>
+#include <unistd.h> // usleep()
 
 /* TODO
  * Consider adding cheats

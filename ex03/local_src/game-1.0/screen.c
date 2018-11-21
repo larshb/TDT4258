@@ -45,8 +45,6 @@ inline int screen_refresh_area(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y
 	return 0;
 }
 
-/* Testing features: */
-
 void draw_rectangle(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1, uint16_t color) {
 	uint16_t r, c;
 	for (c = x0; c < x1; c++) {
@@ -90,29 +88,28 @@ void screen_clear() {
 	draw_rectangle(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, BLACK);
 }
 
-#define BLOCK SCREEN_HEIGHT/16
-void draw_flag() {
-	draw_rectangle(0,       0,       SCREEN_WIDTH, SCREEN_HEIGHT, RED);
-	draw_rectangle(0,       6*BLOCK, SCREEN_WIDTH, 10*BLOCK,      WHITE);
-	draw_rectangle(6*BLOCK, 0,       10*BLOCK,     SCREEN_HEIGHT, WHITE);
-	draw_rectangle(0,       7*BLOCK, SCREEN_WIDTH, 9*BLOCK,       BLUE);
-	draw_rectangle(7*BLOCK, 0,       9*BLOCK,      SCREEN_HEIGHT, BLUE);
+uint16_t* font_getsymbol(char c);
+
+/* Print characters based on 8x8 grid */
+void screen_writechar(char c, uint8_t x, uint8_t y) {
+	draw_block(font_getsymbol(c), x*8, y*8, 8, 8);
 }
 
-#define _O(character, color) case character: o = color; break
-void cdraw(uint16_t* out, char* in, uint16_t n) {
-	uint16_t i, o;
-	for (i = 0; i < n; i++) {
-		switch (in[i]) {
-			_O('W', WHITE);
-			_O('B', BLACK);
-			_O('R', RED);
-			_O('S', SKIN);
-			default: o=WHITE; break;
+void screen_print(char* str, uint8_t x, uint8_t y) {
+	char* c = str;
+	do {
+		if (*c == '\n') {
+			y++;
 		}
-		out[i] = o;
-	}
+		else {
+			screen_writechar(*c, x++, y);
+		}
+	} while (*(++c) != 0);
 }
+
+
+
+/****************** Testing features: **********************/
 
 int8_t sine[40] = {0,15,30,45,58,70,80,89,95,98,100,98,95,89,80,70,58,45,30,15,0,-16,-31,-46,-59,-71,-81,-90,-96,-99,-100,-99,-96,-90,-81,-71,-59,-46,-31,-16};
 int8_t cosine[40] = {100,98,95,89,80,70,58,45,30,15,0,-16,-31,-46,-59,-71,-81,-90,-96,-99,-100,-99,-96,-90,-81,-71,-59,-46,-31,-16,-1,15,30,45,58,70,80,89,95,98};
@@ -151,34 +148,6 @@ void animate_diamond() {
 		draw_line(d.x, d.y, f.x, f.y, YELLOW);
 		draw_line(f.x, f.y, b.x, b.y, YELLOW);
 		screen_refresh();
-	}
-}
-
-uint16_t* font_getsymbol(char c);
-
-/* Print characters based on 8x8 grid */
-void screen_writechar(char c, uint8_t x, uint8_t y) {
-	draw_block(font_getsymbol(c), x*8, y*8, 8, 8);
-}
-
-void screen_print(char* str, uint8_t x, uint8_t y) {
-	char* c = str;
-	do {
-		if (*c == '\n') {
-			y++;
-		}
-		else {
-			screen_writechar(*c, x++, y);
-		}
-	} while (*(++c) != 0);
-}
-
-void ascii_table() {
-	uint8_t r, c;
-	for (r = 0; r <= 8; r++) {
-		for (c = 0; c <= 9; c++) {
-			screen_writechar(r*9+c, r, c);
-		}
 	}
 }
 

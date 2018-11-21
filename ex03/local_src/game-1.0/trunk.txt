@@ -40,3 +40,73 @@ void draw_mario() {
 	draw_block(mario, 160, 120, 16, 16);
 }
 
+#define BYTE_TO_BINARY_PATTERN "%c%c%c%c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+(byte & 0x80 ? '1' : '0'), \
+(byte & 0x40 ? '1' : '0'), \
+(byte & 0x20 ? '1' : '0'), \
+(byte & 0x10 ? '1' : '0'), \
+(byte & 0x08 ? '1' : '0'), \
+(byte & 0x04 ? '1' : '0'), \
+(byte & 0x02 ? '1' : '0'), \
+(byte & 0x01 ? '1' : '0') 
+
+int gamepad_test(){
+	int run;
+	printf("Starting device test code example...\n");
+	gamepad_init();
+	printf("Starting program...\n");
+	uint8_t btns;
+	do {
+		btns = gamepad_read();
+		printf("Buttons: "BYTE_TO_BINARY_PATTERN"\n", BYTE_TO_BINARY(~btns));
+		puts("Run again? [0=no, 1=yes]");
+		fflush(stdin);
+		if (scanf("%u", &run) < 0) {
+			puts("Scan error...");
+		}
+		puts("");
+	} while (run);
+
+	return 0;
+}
+
+typedef enum { SW1, SW2, SW3, SW4, SW5, SW6, SW7, SW8 } button_t;
+
+uint8_t gamepad_button_pressed(button_t btn) {
+	/* FIXME Unnecessary to read from hardware every time */
+	return ~(gamepad_read() >> (uint8_t)(btn)) & 1U;
+}
+
+#define _O(character, color) case character: o = color; break
+void cdraw(uint16_t* out, char* in, uint16_t n) {
+	uint16_t i, o;
+	for (i = 0; i < n; i++) {
+		switch (in[i]) {
+			_O('W', WHITE);
+			_O('B', BLACK);
+			_O('R', RED);
+			_O('S', SKIN);
+			default: o=WHITE; break;
+		}
+		out[i] = o;
+	}
+}
+
+#define BLOCK SCREEN_HEIGHT/16
+void draw_flag() {
+	draw_rectangle(0,       0,       SCREEN_WIDTH, SCREEN_HEIGHT, RED);
+	draw_rectangle(0,       6*BLOCK, SCREEN_WIDTH, 10*BLOCK,      WHITE);
+	draw_rectangle(6*BLOCK, 0,       10*BLOCK,     SCREEN_HEIGHT, WHITE);
+	draw_rectangle(0,       7*BLOCK, SCREEN_WIDTH, 9*BLOCK,       BLUE);
+	draw_rectangle(7*BLOCK, 0,       9*BLOCK,      SCREEN_HEIGHT, BLUE);
+}
+
+void ascii_table() {
+	uint8_t r, c;
+	for (r = 0; r <= 8; r++) {
+		for (c = 0; c <= 9; c++) {
+			screen_writechar(r*9+c, r, c);
+		}
+	}
+}
