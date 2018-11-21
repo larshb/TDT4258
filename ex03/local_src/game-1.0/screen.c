@@ -41,7 +41,7 @@ inline int screen_refresh() {
 
 inline int screen_refresh_area(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
 	struct fb_copyarea area = {x0, y0, x1, y1};
-	TRY(ioctl(screen_fd, FB_UPDATE_CMD, &area), "Refreshing screen");
+	TRY(ioctl(screen_fd, FB_UPDATE_CMD, &area), "Refreshing screen area");
 	return 0;
 }
 
@@ -211,6 +211,7 @@ void ascii_table() {
 
 void darth_plagueis() {
 	int r = 1;
+	screen_clear();
 	screen_print("Did you ever hear the tragedy of Darth",0,r++);
 	screen_print("Plagueis the Wise? I thought not. It's",0,r++);
 	screen_print("not a story the Jedi would tell you.  ",0,r++);

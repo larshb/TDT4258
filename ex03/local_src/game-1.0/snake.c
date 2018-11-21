@@ -2,6 +2,7 @@
 
 #include <stdint.h> // uint8_t ...
 #include <stdlib.h> // random()
+#include <stdio.h>  // sprinft()
 #include <malloc.h> // malloc()
 #include <time.h>   // time()
 #include <unistd.h>
@@ -117,6 +118,8 @@ void food_move(food_t* food) {
 
 int gamepad_init();
 int gamepad_read();
+void screen_print(char*, uint8_t, uint8_t);
+void font_init();
 
 /* Bitfield masks for buttons */
 enum btn_msk {
@@ -133,11 +136,17 @@ enum btn_msk {
 int snake_play() {
 
 	gamepad_init();
+	font_init();
 	screen_init();
 	screen_clear();
-	draw_rectangle(0,0,320,240, WHITE);
+	//draw_rectangle(0,0,320,240, WHITE); /* Christmas mode */
 
-	srand(time(NULL));   // Initialization, should only be called once.
+	uint16_t score = 0;
+	char score_str[30] = {0};
+	sprintf(score_str, "Score: 00000");
+	screen_print(score_str, 28, 29);
+
+	srand(time(NULL));
 
 	food_t food;
 	food_move(&food);
@@ -206,6 +215,7 @@ int snake_play() {
 		if (snake.head->coords.x == food.x &&
 			snake.head->coords.y == food.y)
 		{
+			sprintf(score_str, "Score: %05d", score++);
 			food_move(&food);
 			if (snake_grow(&snake) != 0) {
 				return -1;
@@ -217,6 +227,8 @@ int snake_play() {
 				return -2;
 			}
 		}
+
+		screen_print(score_str, 29, 29);
 		
 		usleep((int)1e4*delay_factor);
 
