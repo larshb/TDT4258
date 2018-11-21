@@ -7,8 +7,11 @@
 #include <time.h>   // time()
 #include <unistd.h> // usleep()
 
-/* TODO
- * Consider adding cheats
+#define SNAKE_BLOCKSIZE 16
+#define SNAKE_XMAX (SCREEN_WIDTH / SNAKE_BLOCKSIZE)
+#define SNAKE_YMAX (SCREEN_HEIGHT / SNAKE_BLOCKSIZE - 1)
+/*                                                    |
+ *      Leave some room on bottom for other stuff ----+
  */
 
 typedef struct {
@@ -35,7 +38,8 @@ typedef struct snake {
 food_t food; /* FIXME Should not need to be a global */
 
 inline void square_draw(coords_t* c, uint16_t color) {
-	draw_rectangle(c->x*16, c->y*16, c->x*16+15, c->y*16+15, color);
+	draw_rectangle(c->x*SNAKE_BLOCKSIZE, c->y*SNAKE_BLOCKSIZE,
+				   c->x*SNAKE_BLOCKSIZE+SNAKE_BLOCKSIZE-1, c->y*SNAKE_BLOCKSIZE+SNAKE_BLOCKSIZE-1, color);
 }
 
 /* Add new snake-head according to moving direction */
@@ -49,16 +53,16 @@ int snake_grow(snake_t* snake) {
 		(*d == UP || *d == DOWN)
 		? c.x
 		: (*d == RIGHT
-			? (c.x==19?0:c.x+1) // MAGIC NUMBER (20*16 screen width)
-			: (c.x==0?19:c.x-1) // MAGIC NUMBER
+			? (c.x==(SNAKE_XMAX-1)?0:c.x+1)
+			: (c.x==0?(SNAKE_XMAX-1):c.x-1)
 			)
 		);
 	new_head->coords.y = (
 		(*d == LEFT || *d == RIGHT)
 		? c.y
 		: (*d == DOWN
-			? (c.y==13?0:c.y+1) // MAGIC NUMBER (15*16 screen height)
-			: (c.y==0?13:c.y-1) // MAGIC NUMBER
+			? (c.y==(SNAKE_YMAX-1)?0:c.y+1)
+			: (c.y==0?(SNAKE_YMAX-1):c.y-1)
 			)
 		);
 	snake->head = new_head;
@@ -120,8 +124,8 @@ void snake_turn(snake_t* snake, dir_t dir) {
 }
 
 void food_move(food_t* food) {
-	food->x = random()%20;
-	food->y = random()%13+1;
+	food->x = random()%SNAKE_XMAX;
+	food->y = random()%SNAKE_YMAX;
 	square_draw(food, YELLOW);
 }
 
@@ -145,16 +149,13 @@ int snake_play() {
 	//draw_rectangle(0,0,320,240, WHITE); /* Christmas mode */
 
 	uint16_t score = 0;
-	char score_str[30] = {0};
+	char score_str[16] = {0};
 	sprintf(score_str, "Score: 00000");
 
-	srand(time(NULL));
-
-	food_move(&food);
-
 	/* Init */
+	srand(time(NULL));
+	food_move(&food);
 	snake_t snake;
-	//snake.grow = snake_grow;
 
 	node_t tail = {
 		.coords = {5,5},
@@ -228,7 +229,6 @@ int snake_play() {
 				return -2;
 			}
 		}
-
 
 		screen_print(score_str, 28, 29);
 		

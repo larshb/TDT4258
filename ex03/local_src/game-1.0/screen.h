@@ -3,7 +3,12 @@
 
 #include <stdint.h>
 
-/* 16-bit colors */
+#define SCREEN_WIDTH  320
+#define SCREEN_HEIGHT 240
+
+/* 16-bit colors 
+ * FIXME Consider using enumerators instead
+ */
 
 #define  WHITE 0b1111111111111111
 #define  BLACK 0b0000000000000000

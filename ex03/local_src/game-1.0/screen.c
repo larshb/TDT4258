@@ -10,8 +10,6 @@
 #define FB_PATH "/dev/fb0"
 #define FB_UPDATE_CMD 0x4680
 
-#define SCREEN_WIDTH  320
-#define SCREEN_HEIGHT 240
 #define BYTES_PER_PIXEL 2
 
 int screen_fd;
