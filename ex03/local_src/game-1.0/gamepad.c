@@ -12,12 +12,12 @@ int gamepad_init() {
 		puts("System error...");
 	if(system("modprobe driver-gamepad") < 0)
 		puts("System error 2...");
-   fd = open("/dev/gamepad", O_RDWR);             // Open the device with read/write access
-   if (fd < 0){
-   	perror("Failed to open the device...");
-   	return errno;
-   }
-   return 0;
+	fd = open("/dev/gamepad", O_RDWR);             // Open the device with read/write access
+	if (fd < 0){
+		perror("Failed to open the device...");
+		return errno;
+	}
+	return 0;
 }
 
 inline uint8_t gamepad_read() {

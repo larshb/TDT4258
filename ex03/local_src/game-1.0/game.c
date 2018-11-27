@@ -7,7 +7,6 @@ void screen_clear();
 int gamepad_init();
 
 int snake_play();
-void animate_diamond();
 void darth_plagueis();
 
 int main(int argc, char *argv[])
@@ -15,7 +14,6 @@ int main(int argc, char *argv[])
 	printf("Hello World, I'm game!\n");
 
 	screen_init();
-	//animate_diamond(); /* FIXME Slow af */
 
 	gamepad_init();
 	font_init();

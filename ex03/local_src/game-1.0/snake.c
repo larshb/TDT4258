@@ -176,8 +176,7 @@ int snake_play() {
 
 	uint8_t btns = 0;
 	uint8_t delay_factor = 10;
-	while (1) {//(!(btns & MSK_SW4)) { //Exit
-
+	while (1) {
 		if (btns & MSK_SW1) {
 			snake_turn(&snake, LEFT);
 		}
